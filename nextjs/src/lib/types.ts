@@ -34,6 +34,212 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          avatar_url: string | null
+          subscription_status: string
+          stripe_customer_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          avatar_url?: string | null
+          subscription_status?: string
+          stripe_customer_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          subscription_status?: string
+          stripe_customer_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      meetings: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          date: string
+          duration: number
+          status: string
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string
+          date: string
+          duration?: number
+          status?: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          date?: string
+          duration?: number
+          status?: string
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      projects: {
+        Row: {
+          id: string
+          name: string
+          description: string
+          meeting_id: string
+          color: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string
+          meeting_id: string
+          color?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string
+          meeting_id?: string
+          color?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      tasks: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          status: string
+          project_id: string
+          order_index: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string
+          status?: string
+          project_id: string
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          status?: string
+          project_id?: string
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      meeting_notes: {
+        Row: {
+          id: string
+          meeting_id: string
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          meeting_id: string
+          content?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meeting_id?: string
+          content?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      report_settings: {
+        Row: {
+          id: string
+          user_id: string
+          template_name: string
+          style_settings: any
+          additional_prompt: string
+          is_default: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          template_name: string
+          style_settings?: any
+          additional_prompt?: string
+          is_default?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          template_name?: string
+          style_settings?: any
+          additional_prompt?: string
+          is_default?: boolean
+          created_at?: string
+        }
+      }
+      generated_reports: {
+        Row: {
+          id: string
+          meeting_id: string
+          report_settings_id: string | null
+          content: string | null
+          email_subject: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          meeting_id: string
+          report_settings_id?: string | null
+          content?: string | null
+          email_subject?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          meeting_id?: string
+          report_settings_id?: string | null
+          content?: string | null
+          email_subject?: string | null
+          status?: string
+          created_at?: string
+        }
+      }
       todo_list: {
         Row: {
           created_at: string

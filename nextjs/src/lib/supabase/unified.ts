@@ -74,6 +74,60 @@ export class SassClient {
 
     }
 
+    async getUserMeetingsFull(userId: string='') {
+        let query = this.client
+        .from("meetings")
+        .select(`
+        id,
+        title,
+        description,
+        date,
+        duration,
+        status,
+        created_at,
+        updated_at,
+
+        projects (
+            id,
+            name,
+            description,
+            color,
+            created_at,
+            updated_at,
+            tasks (
+            id,
+            title,
+            description,
+            status,
+            order_index,
+            created_at,
+            updated_at
+            )
+        ),
+
+        meeting_notes (
+            id,
+            content,
+            created_at,
+            updated_at
+        ),
+
+        generated_reports (
+            id,
+            report_settings_id,
+            content,
+            email_subject,
+            status,
+            created_at
+        )
+        `)
+        .eq("user_id", userId)
+
+        return query
+    }
+
+    
+
     async getMyTodoList(page: number = 1, pageSize: number = 100, order: string = 'created_at', done: boolean | null = false) {
         let query = this.client.from('todo_list').select('*').range(page * pageSize - pageSize, page * pageSize - 1).order(order)
         if (done !== null) {
