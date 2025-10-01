@@ -5,17 +5,20 @@ import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
 import { Save, FileText, Clock, Type, List, Hash } from 'lucide-react';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 
 interface NotesViewProps {
   notes: string;
+  meetingId: string;
   onUpdate: (notes: string) => void;
 }
 
-export default function NotesView({ notes, onUpdate }: NotesViewProps) {
+export default function NotesView({ notes, meetingId, onUpdate }: NotesViewProps) {
   const [localNotes, setLocalNotes] = useState(notes);
   const [hasChanges, setHasChanges] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -28,10 +31,23 @@ export default function NotesView({ notes, onUpdate }: NotesViewProps) {
     setHasChanges(localNotes !== notes);
   }, [localNotes, notes]);
 
-  const handleSave = () => {
-    onUpdate(localNotes);
-    setHasChanges(false);
-    setLastSaved(new Date());
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const supabase = await createSPASassClient();
+      const { error } = await supabase.updateMeetingNotes(meetingId, localNotes);
+
+      if (error) throw error;
+
+      onUpdate(localNotes);
+      setHasChanges(false);
+      setLastSaved(new Date());
+    } catch (err) {
+      console.error('Error saving notes:', err);
+      alert('Failed to save notes');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -123,11 +139,11 @@ export default function NotesView({ notes, onUpdate }: NotesViewProps) {
               )}
               <Button
                 onClick={handleSave}
-                disabled={!hasChanges}
+                disabled={!hasChanges || isSaving}
                 className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
-                {hasChanges ? 'Save Changes' : 'Saved'}
+                {isSaving ? 'Saving...' : hasChanges ? 'Save Changes' : 'Saved'}
               </Button>
             </div>
           </div>

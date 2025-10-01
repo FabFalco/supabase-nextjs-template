@@ -21,13 +21,11 @@ export function mapSupabaseToMeetings(raw: any[]): Meeting[] {
       }))
     })),
 
-    // si plusieurs notes → tu choisis la dernière par ex.
     notes: meeting.meeting_notes?.[0]?.content ?? "",
 
-    // idem pour les reportSettings (ici on prend le dernier report généré comme exemple)
     reportSettings: {
-      style: "executive", // valeur par défaut → tu pourras mapper avec `report_settings` si tu veux
-      additionalPrompt: meeting.generated_reports?.[0]?.content ?? ""
+      style: (meeting.report_settings?.[0]?.style as 'executive' | 'detailed' | 'client-friendly' | 'technical') ?? 'executive',
+      additionalPrompt: meeting.report_settings?.[0]?.additional_prompt ?? ""
     }
   }))
 }

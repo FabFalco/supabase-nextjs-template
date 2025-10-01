@@ -112,21 +112,124 @@ export class SassClient {
             updated_at
         ),
 
+        report_settings (
+            id,
+            style,
+            additional_prompt,
+            created_at,
+            updated_at
+        ),
+
         generated_reports (
             id,
-            report_settings_id,
             content,
-            email_subject,
-            status,
+            file_path,
             created_at
         )
         `)
         .eq("user_id", userId)
+        .order('date', { ascending: false })
 
         return query
     }
 
-    
+    async createMeeting(row: Database["public"]["Tables"]["meetings"]["Insert"]) {
+        const result = await this.client.from('meetings').insert(row).select().single()
+        if (result.data) {
+            await this.client.from('report_settings').insert({
+                meeting_id: result.data.id,
+                style: 'executive',
+                additional_prompt: ''
+            })
+            await this.client.from('meeting_notes').insert({
+                meeting_id: result.data.id,
+                content: ''
+            })
+        }
+        return result
+    }
+
+    async updateMeeting(id: string, row: Database["public"]["Tables"]["meetings"]["Update"]) {
+        return this.client.from('meetings').update(row).eq('id', id)
+    }
+
+    async deleteMeeting(id: string) {
+        return this.client.from('meetings').delete().eq('id', id)
+    }
+
+    async createProject(row: Database["public"]["Tables"]["projects"]["Insert"]) {
+        return this.client.from('projects').insert(row).select().single()
+    }
+
+    async updateProject(id: string, row: Database["public"]["Tables"]["projects"]["Update"]) {
+        return this.client.from('projects').update(row).eq('id', id)
+    }
+
+    async deleteProject(id: string) {
+        return this.client.from('projects').delete().eq('id', id)
+    }
+
+    async createTask(row: Database["public"]["Tables"]["tasks"]["Insert"]) {
+        return this.client.from('tasks').insert(row).select().single()
+    }
+
+    async updateTask(id: string, row: Database["public"]["Tables"]["tasks"]["Update"]) {
+        return this.client.from('tasks').update(row).eq('id', id)
+    }
+
+    async deleteTask(id: string) {
+        return this.client.from('tasks').delete().eq('id', id)
+    }
+
+    async updateMeetingNotes(meetingId: string, content: string) {
+        const { data, error } = await this.client
+            .from('meeting_notes')
+            .select('id')
+            .eq('meeting_id', meetingId)
+            .maybeSingle()
+
+        if (data) {
+            return this.client.from('meeting_notes').update({ content }).eq('meeting_id', meetingId)
+        } else {
+            return this.client.from('meeting_notes').insert({ meeting_id: meetingId, content })
+        }
+    }
+
+    async updateReportSettings(meetingId: string, style: string, additionalPrompt: string) {
+        const { data, error } = await this.client
+            .from('report_settings')
+            .select('id')
+            .eq('meeting_id', meetingId)
+            .maybeSingle()
+
+        if (data) {
+            return this.client.from('report_settings').update({ style, additional_prompt: additionalPrompt }).eq('meeting_id', meetingId)
+        } else {
+            return this.client.from('report_settings').insert({ meeting_id: meetingId, style, additional_prompt: additionalPrompt })
+        }
+    }
+
+    async saveGeneratedReport(meetingId: string, content: string, filePath: string) {
+        const { data, error } = await this.client
+            .from('generated_reports')
+            .select('id')
+            .eq('meeting_id', meetingId)
+            .maybeSingle()
+
+        if (data) {
+            return this.client.from('generated_reports').update({ content, file_path: filePath }).eq('meeting_id', meetingId)
+        } else {
+            return this.client.from('generated_reports').insert({ meeting_id: meetingId, content, file_path: filePath })
+        }
+    }
+
+    async getGeneratedReport(meetingId: string) {
+        return this.client
+            .from('generated_reports')
+            .select('*')
+            .eq('meeting_id', meetingId)
+            .maybeSingle()
+    }
 
     async getMyTodoList(page: number = 1, pageSize: number = 100, order: string = 'created_at', done: boolean | null = false) {
         let query = this.client.from('todo_list').select('*').range(page * pageSize - pageSize, page * pageSize - 1).order(order)
@@ -136,11 +239,11 @@ export class SassClient {
         return query
     }
 
-    async createTask(row: Database["public"]["Tables"]["todo_list"]["Insert"]) {
+    async createTodoTask(row: Database["public"]["Tables"]["todo_list"]["Insert"]) {
         return this.client.from('todo_list').insert(row)
     }
 
-    async removeTask (id: string) {
+    async removeTodoTask (id: string) {
         return this.client.from('todo_list').delete().eq('id', id)
     }
 

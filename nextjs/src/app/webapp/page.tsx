@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/webapp/ui/badge';
 import { Plus, Calendar, Users, CheckSquare, FileText, Settings, Loader2 } from 'lucide-react';
 import MeetingView from '@/components/webapp/MeetingView';
+import CreateMeetingDialog from '@/components/webapp/CreateMeetingDialog';
 import { Meeting } from '@/types';
 import { Database } from '@/lib/types';
 import { mapSupabaseToMeetings } from '@/lib/mapper'
@@ -112,6 +113,7 @@ export default function Home() {
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
 
   useEffect(() => {
       if (user?.id) {
@@ -183,7 +185,10 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Meeting Reports</h1>
               <p className="text-gray-600 text-lg">Manage your meetings, projects, and generate AI-powered reports</p>
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+            >
               <Plus className="w-5 h-5" />
               New Meeting
             </Button>
@@ -350,12 +355,23 @@ export default function Home() {
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No meetings yet</h3>
             <p className="text-gray-600 mb-4">Create your first meeting to get started with project management and reporting.</p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Meeting
             </Button>
           </div>
         )}
+
+        {/* Create Meeting Dialog */}
+        <CreateMeetingDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onMeetingCreated={loadTasks}
+          userId={user?.id || ''}
+        />
       </div>
     </div>
   );
