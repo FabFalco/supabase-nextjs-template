@@ -7,7 +7,7 @@ import {
 import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
-import { Plus, Calendar, Users, CheckSquare, FileText, Settings, Loader2 } from 'lucide-react';
+import { Plus, Calendar, Users, SquareCheck as CheckSquare, FileText, Settings, Loader as Loader2 } from 'lucide-react';
 import MeetingView from '@/components/webapp/MeetingView';
 import CreateMeetingDialog from '@/components/webapp/CreateMeetingDialog';
 import { Meeting } from '@/types';

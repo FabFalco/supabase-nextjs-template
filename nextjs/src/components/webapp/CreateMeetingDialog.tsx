@@ -7,7 +7,7 @@ import { Input } from '@/components/webapp/ui/input';
 import { Label } from '@/components/webapp/ui/label';
 import { Textarea } from '@/components/webapp/ui/textarea';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader as Loader2 } from 'lucide-react';
 
 interface CreateMeetingDialogProps {
   open: boolean;
