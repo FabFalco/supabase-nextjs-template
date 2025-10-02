@@ -234,6 +234,7 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
 
           <TabsContent value="settings">
             <ReportSettings
+              meetingId={meeting.id}
               settings={meeting.reportSettings}
               onUpdate={handleReportSettingsUpdate}
             />

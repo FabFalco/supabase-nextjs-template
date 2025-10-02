@@ -11,6 +11,7 @@ import { Plus, Calendar, Users, SquareCheck as CheckSquare, FileText, Settings, 
 import MeetingView from '@/components/webapp/MeetingView';
 import CreateMeetingDialog from '@/components/webapp/CreateMeetingDialog';
 import { Meeting } from '@/types';
+import TopNavBar from '@/components/webapp/TopNavBar';
 import { Database } from '@/lib/types';
 import { mapSupabaseToMeetings } from '@/lib/mapper'
 
