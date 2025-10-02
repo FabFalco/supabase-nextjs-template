@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/webapp/ui/button';
 import { Input } from '@/components/webapp/ui/input';
 import { Label } from '@/components/webapp/ui/label';
-import { ArrowLeft, Key, Loader2 } from 'lucide-react';
+import { ArrowLeft, Key, Loader as Loader2 } from 'lucide-react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import TopNavBar from '@/components/webapp/TopNavBar';
 

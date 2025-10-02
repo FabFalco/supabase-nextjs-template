@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Button } from '@/components/webapp/ui/button';
-import { ArrowLeft, CreditCard, ExternalLink, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, ExternalLink, CircleAlert as AlertCircle } from 'lucide-react';
 import TopNavBar from '@/components/webapp/TopNavBar';
 
 export default function StripeSettingsPage() {
