@@ -72,7 +72,7 @@ export default function Home() {
                   Pricing
                 </Link>
                 <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
+                    href="https://github.com/FabFalco/supabase-nextjs-template"
                     className="text-gray-600 hover:text-gray-900"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -81,7 +81,7 @@ export default function Home() {
                 </Link>
 
                 <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
+                    href="https://github.com/FabFalco/supabase-nextjs-template"
                     className="bg-primary-800 text-white px-4 py-2 rounded-lg hover:bg-primary-900 transition-colors"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -192,7 +192,7 @@ export default function Home() {
                 <h4 className="text-sm font-semibold text-gray-900">Resources</h4>
                 <ul className="mt-4 space-y-2">
                   <li>
-                    <Link href="https://github.com/Razikus/supabase-nextjs-template" className="text-gray-600 hover:text-gray-900">
+                    <Link href="https://github.com/FabFalco/supabase-nextjs-template" className="text-gray-600 hover:text-gray-900">
                       Documentation
                     </Link>
                   </li>

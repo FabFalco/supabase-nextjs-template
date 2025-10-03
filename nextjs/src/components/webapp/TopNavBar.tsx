@@ -14,6 +14,7 @@ import {
 import { User, LogOut, Key, CreditCard } from 'lucide-react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard/ui/avatar';
 
 export default function TopNavBar() {
   const router = useRouter();
@@ -49,22 +50,25 @@ export default function TopNavBar() {
 
           <div className="flex items-center gap-4">
             {user && (
-              <>
-                <span className="text-sm text-gray-600 hidden sm:inline">{user.email}</span>
-                
+              <>                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 h-9 w-9 rounded-full"
                     >
-                      <User className="w-4 h-4" />
-                      <span className="hidden sm:inline">Profile</span>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.email} alt="Profile" />
+                        <AvatarFallback>
+                          {user?.email?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem onClick={handleChangePassword}>
