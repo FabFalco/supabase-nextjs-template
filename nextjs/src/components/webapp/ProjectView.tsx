@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui
 import { Badge } from '@/components/webapp/ui/badge';
 import { ArrowLeft, Plus, GripVertical } from 'lucide-react';
 import { Project, Task } from '@/types';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import TopNavBar from '@/components/webapp/TopNavBar';
 
 interface ProjectViewProps {
   project: Project;
@@ -48,19 +50,26 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, newStatus: Task['status']) => {
+  const handleDrop = async (e: React.DragEvent, newStatus: Task['status']) => {
     e.preventDefault();
-    
+
     if (draggedTask && draggedFrom !== newStatus) {
       const updatedTasks = project.tasks.map(task =>
         task.id === draggedTask.id
           ? { ...task, status: newStatus }
           : task
       );
-      
+
       onUpdate({ ...project, tasks: updatedTasks });
+
+      try {
+        const supabase = await createSPASassClient();
+        await supabase.updateTask(draggedTask.id, { status: newStatus });
+      } catch (err) {
+        console.error('Error updating task status:', err);
+      }
     }
-    
+
     setDraggedTask(null);
     setDraggedFrom(null);
   };
@@ -69,29 +78,56 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
     return project.tasks.filter(task => task.status === status);
   };
 
-  const addNewTask = (status: Task['status']) => {
-    const newTask: Task = {
-      id: `t${Date.now()}`,
-      title: 'New Task',
-      status,
-      description: 'Click to edit description'
-    };
-    
-    onUpdate({
-      ...project,
-      tasks: [...project.tasks, newTask]
-    });
+  const addNewTask = async (status: Task['status']) => {
+    try {
+      const supabase = await createSPASassClient();
+      const { data, error } = await supabase.createTask({
+        title: 'New Task',
+        description: 'Click to edit description',
+        status,
+        project_id: project.id,
+        order_index: project.tasks.length
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        const newTask: Task = {
+          id: data.id,
+          title: data.title,
+          status: data.status as Task['status'],
+          description: data.description || ''
+        };
+
+        onUpdate({
+          ...project,
+          tasks: [...project.tasks, newTask]
+        });
+      }
+    } catch (err) {
+      console.error('Error creating task:', err);
+      alert('Failed to create task');
+    }
   };
 
-  const updateTask = (taskId: string, updates: Partial<Task>) => {
+  const updateTask = async (taskId: string, updates: Partial<Task>) => {
     const updatedTasks = project.tasks.map(task =>
       task.id === taskId ? { ...task, ...updates } : task
     );
-    
+
     onUpdate({ ...project, tasks: updatedTasks });
+
+    try {
+      const supabase = await createSPASassClient();
+      await supabase.updateTask(taskId, updates);
+    } catch (err) {
+      console.error('Error updating task:', err);
+    }
   };
 
   return (
+    <>
+    <TopNavBar title={""}/>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
@@ -203,5 +239,6 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
         </div>
       </div>
     </div>
+    </>
   );
 }

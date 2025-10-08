@@ -1,25 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Button } from '@/components/webapp/ui/button';
 import { Badge } from '@/components/webapp/ui/badge';
-import { Sparkles, Download, Copy, RefreshCw, FileText, Clock } from 'lucide-react';
+import { Sparkles, Download, Copy, RefreshCw, FileText, Clock, Mail, Save } from 'lucide-react';
 import { Meeting } from '@/types';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import { useGlobal } from '@/lib/context/GlobalContext';
 
 interface ReportGenerationProps {
   meeting: Meeting;
 }
 
 export default function ReportGeneration({ meeting }: ReportGenerationProps) {
+  const { user } = useGlobal();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedReport, setGeneratedReport] = useState<string | null>(null);
   const [lastGenerated, setLastGenerated] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadExistingReport();
+  }, [meeting.id]);
+
+  const loadExistingReport = async () => {
+    setIsLoading(true);
+    try {
+      const supabase = await createSPASassClient();
+      const { data: reportData, error: reportError } = await supabase.getGeneratedReport(meeting.id);
+
+      if (!reportError && reportData) {
+        if (reportData.file_path) {
+          const filePath = reportData.file_path.split('/').pop();
+          if (filePath) {
+            const { data: fileData, error: fileError } = await supabase.shareFile(
+              user?.id || '',
+              filePath,
+              60,
+              true
+            );
+
+            if (!fileError && fileData.signedUrl) {
+              const response = await fetch(fileData.signedUrl);
+              const content = await response.text();
+              setGeneratedReport(content);
+              setLastGenerated(new Date(reportData.created_at));
+            }
+          }
+        } else if (reportData.content) {
+          setGeneratedReport(reportData.content);
+          setLastGenerated(new Date(reportData.created_at));
+        }
+      }
+    } catch (err) {
+      console.error('Error loading report:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const generateReport = async () => {
     setIsGenerating(true);
     
-    // Simulate AI report generation
     setTimeout(() => {
       const report = generateMockReport(meeting);
       setGeneratedReport(report);
@@ -28,9 +72,39 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
     }, 3000);
   };
 
+  const saveReport = async () => {
+    if (!generatedReport || !user?.id) return;
+
+    setIsSaving(true);
+    try {
+      const supabase = await createSPASassClient();
+      
+      const fileName = `report_${meeting.id}_${Date.now()}.md`;
+      const file = new Blob([generatedReport], { type: 'text/markdown' });
+      const fileToUpload = new File([file], fileName, { type: 'text/markdown' });
+
+      const { error: uploadError } = await supabase.uploadFile(user.id, fileName, fileToUpload);
+
+      if (uploadError) throw uploadError;
+
+      const filePath = `${user.id}/${fileName}`;
+      const { error: saveError } = await supabase.saveGeneratedReport(meeting.id, generatedReport, filePath);
+
+      if (saveError) throw saveError;
+
+      alert('Report saved successfully to file storage!');
+    } catch (err) {
+      console.error('Error saving report:', err);
+      alert('Failed to save report');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const copyToClipboard = () => {
     if (generatedReport) {
       navigator.clipboard.writeText(generatedReport);
+      alert('Report copied to clipboard!');
     }
   };
 
@@ -48,14 +122,31 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
     }
   };
 
+  const createEmailDraft = () => {
+    if (!generatedReport) return;
+
+    const subject = encodeURIComponent(`Meeting Report: ${meeting.title}`);
+    const body = encodeURIComponent(generatedReport);
+    const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+    
+    window.location.href = mailtoLink;
+  };
+
   const getTotalTasks = () => meeting.projects.reduce((acc, project) => acc + project.tasks.length, 0);
   const getCompletedTasks = () => meeting.projects.reduce((acc, project) => 
     acc + project.tasks.filter(task => task.status === 'finish').length, 0
   );
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Generation Header */}
       <Card className="bg-white border-0 shadow-md">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -100,7 +191,6 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
         </CardHeader>
       </Card>
 
-      {/* Meeting Summary */}
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <CardTitle className="text-lg text-blue-900">Report Input Summary</CardTitle>
@@ -150,7 +240,6 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
         </CardContent>
       </Card>
 
-      {/* Generated Report */}
       {(isGenerating || generatedReport) && (
         <Card className="bg-white border-0 shadow-md">
           <CardHeader>
@@ -168,7 +257,16 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
               </div>
               
               {generatedReport && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={createEmailDraft}
+                    className="flex items-center gap-2"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Email Draft
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -186,6 +284,15 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
                   >
                     <Download className="w-4 h-4" />
                     Download
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={saveReport}
+                    disabled={isSaving}
+                    className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSaving ? 'Saving...' : 'Save to Storage'}
                   </Button>
                 </div>
               )}
@@ -217,15 +324,16 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
         </Card>
       )}
 
-      {/* Instructions */}
       <Card className="bg-amber-50 border-amber-200 border">
         <CardContent className="p-4">
-          <h4 className="font-medium text-amber-900 mb-2">🤖 AI Report Generation:</h4>
+          <h4 className="font-medium text-amber-900 mb-2">Report Generation Features:</h4>
           <ul className="text-sm text-amber-800 space-y-1">
-            <li>• The AI analyzes your meeting data, project status, tasks, and notes</li>
-            <li>• Reports are generated based on your selected style and custom instructions</li>
-            <li>• Generated reports can be copied or downloaded as Markdown files</li>
-            <li>• Regenerate reports anytime as your meeting data changes</li>
+            <li>• AI analyzes your meeting data, projects, tasks, and notes</li>
+            <li>• Reports generated based on selected style and custom instructions</li>
+            <li>• Create email drafts to send reports directly</li>
+            <li>• Download reports as Markdown files</li>
+            <li>• Save to Supabase storage (one report per meeting, automatically retrieved)</li>
+            <li>• Regenerate reports anytime as meeting data changes</li>
           </ul>
         </CardContent>
       </Card>
@@ -233,7 +341,6 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
   );
 }
 
-// Mock report generation function
 function generateMockReport(meeting: Meeting): string {
   const totalTasks = meeting.projects.reduce((acc, project) => acc + project.tasks.length, 0);
   const completedTasks = meeting.projects.reduce((acc, project) => 
@@ -248,7 +355,6 @@ function generateMockReport(meeting: Meeting): string {
 
   let report = '';
 
-  // Report header based on style
   switch (meeting.reportSettings.style) {
     case 'executive':
       report += `# Executive Summary: ${meeting.title}\n\n`;
@@ -278,7 +384,6 @@ function generateMockReport(meeting: Meeting): string {
       report += `- Description: ${meeting.description}\n\n`;
   }
 
-  // Project sections
   report += `## Project Status\n\n`;
   
   meeting.projects.forEach((project) => {
@@ -290,7 +395,6 @@ function generateMockReport(meeting: Meeting): string {
     report += `${project.description}\n\n`;
     report += `**Progress:** ${projectCompleted}/${projectTotal} tasks completed (${projectProgress}%)\n\n`;
 
-    // Task breakdown by status
     const tasksByStatus = {
       'finish': project.tasks.filter(t => t.status === 'finish'),
       'in-progress': project.tasks.filter(t => t.status === 'in-progress'),
@@ -309,13 +413,11 @@ function generateMockReport(meeting: Meeting): string {
     });
   });
 
-  // Notes section
   if (meeting.notes) {
     report += `## Meeting Notes\n\n`;
     report += `${meeting.notes}\n\n`;
   }
 
-  // Summary and action items
   report += `## Summary & Next Steps\n\n`;
   
   if (meeting.reportSettings.style === 'executive') {
@@ -343,7 +445,6 @@ function generateMockReport(meeting: Meeting): string {
     report += `- Completion Rate: ${Math.round((completedTasks / Math.max(totalTasks, 1)) * 100)}%\n\n`;
   }
 
-  // Add custom prompt influence
   if (meeting.reportSettings.additionalPrompt) {
     report += `\n**Additional Considerations:**\n`;
     report += `${meeting.reportSettings.additionalPrompt}\n`;
