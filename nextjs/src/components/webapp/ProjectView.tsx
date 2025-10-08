@@ -7,6 +7,7 @@ import { Badge } from '@/components/webapp/ui/badge';
 import { ArrowLeft, Plus, GripVertical } from 'lucide-react';
 import { Project, Task } from '@/types';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import TopNavBar from '@/components/webapp/TopNavBar';
 
 interface ProjectViewProps {
   project: Project;
@@ -125,6 +126,8 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
   };
 
   return (
+    <>
+    <TopNavBar title={""}/>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
@@ -236,5 +239,6 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
         </div>
       </div>
     </div>
+    </>
   );
 }

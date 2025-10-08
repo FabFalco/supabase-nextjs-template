@@ -14,6 +14,7 @@ import ReportGeneration from './ReportGeneration';
 import CreateProjectDialog from './CreateProjectDialog';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { mapSupabaseToMeetings } from '@/lib/mapper';
+import TopNavBar from '@/components/webapp/TopNavBar';
 
 interface MeetingViewProps {
   meeting: Meeting;
@@ -87,7 +88,21 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
     }
   };
 
+  const buttonBack = (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+      <Button
+        variant="ghost"
+        onClick={onBack}
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Meetings
+      </Button>
+    </div>
+  );
+
   return (
+    <>
+    <TopNavBar title = {buttonBack} />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
@@ -256,5 +271,6 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
         />
       </div>
     </div>
+    </>
   );
 }
