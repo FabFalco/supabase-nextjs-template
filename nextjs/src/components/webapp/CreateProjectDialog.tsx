@@ -6,6 +6,7 @@ import { Button } from '@/components/webapp/ui/button';
 import { Input } from '@/components/webapp/ui/input';
 import { Label } from '@/components/webapp/ui/label';
 import { Textarea } from '@/components/webapp/ui/textarea';
+import { mapSupabaseToProject } from '@/lib/mapper';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { Loader as Loader2 } from 'lucide-react';
 

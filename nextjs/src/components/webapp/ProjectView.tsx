@@ -7,7 +7,7 @@ import { Badge } from '@/components/webapp/ui/badge';
 import { ArrowLeft, Plus, GripVertical } from 'lucide-react';
 import { Project, Task } from '@/types';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
-import TopNavBar from '@/components/webapp/TopNavBar';
+import { mapSupabaseToTask, mapTaskToSupabase } from '@/lib/mapper';
 
 interface ProjectViewProps {
   project: Project;
@@ -92,12 +92,7 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
       if (error) throw error;
 
       if (data) {
-        const newTask: Task = {
-          id: data.id,
-          title: data.title,
-          status: data.status as Task['status'],
-          description: data.description || ''
-        };
+        const newTask = mapSupabaseToTask(data);
 
         onUpdate({
           ...project,
@@ -119,27 +114,14 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
 
     try {
       const supabase = await createSPASassClient();
-      await supabase.updateTask(taskId, updates);
+      const dbUpdates = mapTaskToSupabase(updates);
+      await supabase.updateTask(taskId, dbUpdates);
     } catch (err) {
       console.error('Error updating task:', err);
     }
   };
 
-  const buttonBack = (
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-        <Button
-          variant="ghost"
-          onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Meetings
-        </Button>
-      </div>
-    );
-
   return (
-    <>
-    <TopNavBar title = {buttonBack} />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}

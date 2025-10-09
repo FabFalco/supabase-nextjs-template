@@ -14,6 +14,7 @@ import ReportGeneration from './ReportGeneration';
 import CreateProjectDialog from './CreateProjectDialog';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { mapSupabaseToMeetings } from '@/lib/mapper';
+import { mapSupabaseToProject } from '@/lib/mapper';
 import TopNavBar from '@/components/webapp/TopNavBar';
 
 interface MeetingViewProps {
