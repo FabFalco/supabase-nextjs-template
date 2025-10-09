@@ -125,9 +125,21 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
     }
   };
 
+  const buttonBack = (
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <Button
+          variant="ghost"
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Meetings
+        </Button>
+      </div>
+    );
+
   return (
     <>
-    <TopNavBar title={""}/>
+    <TopNavBar title = {buttonBack} />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}

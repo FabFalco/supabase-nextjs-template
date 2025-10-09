@@ -16,7 +16,7 @@ import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/s
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard/ui/avatar';
 
-export default function TopNavBar({ title = 'Meeting Reports' }) {
+export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">'Meeting Reports'</h1>) }) {
   const router = useRouter();
   const { user } = useGlobal();
   const [isLoggingOut, setIsLoggingOut] = useState(false);

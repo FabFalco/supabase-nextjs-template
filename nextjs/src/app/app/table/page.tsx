@@ -53,7 +53,7 @@ function CreateTaskDialog({ onTaskCreated }: CreateTaskDialogProps) {
                 done: false
             };
 
-            const { error: supabaseError } = await supabase.createTask(newTask);
+            const { error: supabaseError } = await supabase.createTodoTask(newTask);
             if (supabaseError) throw supabaseError;
 
             setNewTaskTitle('');
@@ -167,7 +167,7 @@ export default function TaskManagementPage() {
     const handleRemoveTask = async (id: number): Promise<void> => {
         try {
             const supabase = await createSPASassClient();
-            const { error: supabaseError } = await supabase.removeTask(id.toString());
+            const { error: supabaseError } = await supabase.removeTodoTask(id.toString());
             if (supabaseError) throw supabaseError;
             await loadTasks();
         } catch (err) {

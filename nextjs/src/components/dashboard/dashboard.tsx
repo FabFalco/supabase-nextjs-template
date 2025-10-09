@@ -7,7 +7,7 @@ import { useUser } from '@/hooks/use-user';
 import { DashboardLayout } from './layout/dashboard-layout';
 import { MeetingsList } from './meetings/meetings-list';
 import { CreateMeetingDialog } from './meetings/create-meeting-dialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/dashboard/ui/button';
 import { Plus, Calendar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/dashboard/ui/card';
 
