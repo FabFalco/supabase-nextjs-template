@@ -8,6 +8,7 @@ import { Sparkles, Download, Copy, RefreshCw, FileText, Clock, Mail, Save } from
 import { Meeting } from '@/types';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
+import { mapSupabaseToGeneratedReport } from '@/lib/mapper';
 
 interface ReportGenerationProps {
   meeting: Meeting;
@@ -32,8 +33,9 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
       const { data: reportData, error: reportError } = await supabase.getGeneratedReport(meeting.id);
 
       if (!reportError && reportData) {
-        if (reportData.file_path) {
-          const filePath = reportData.file_path.split('/').pop();
+        const report = mapSupabaseToGeneratedReport(reportData)
+        if (report.file_path) {
+          const filePath = report.file_path.split('/').pop();
           if (filePath) {
             const { data: fileData, error: fileError } = await supabase.shareFile(
               user?.id || '',
@@ -46,12 +48,12 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
               const response = await fetch(fileData.signedUrl);
               const content = await response.text();
               setGeneratedReport(content);
-              setLastGenerated(new Date(reportData.created_at));
+              setLastGenerated(new Date(report.created_at));
             }
           }
-        } else if (reportData.content) {
-          setGeneratedReport(reportData.content);
-          setLastGenerated(new Date(reportData.created_at));
+        } else if (report.content) {
+          setGeneratedReport(report.content);
+          setLastGenerated(new Date(report.created_at));
         }
       }
     } catch (err) {

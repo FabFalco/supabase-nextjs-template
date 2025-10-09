@@ -27,3 +27,9 @@ export interface Meeting {
   notes: string;
   reportSettings: ReportSettings;
 }
+
+export interface GeneratedReport {
+  content: string;
+  file_path: string;
+  created_at: string;
+}

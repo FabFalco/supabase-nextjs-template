@@ -1,4 +1,4 @@
-import { Meeting, Project, Task, ReportSettings } from '@/types';
+import { Meeting, Project, Task, ReportSettings, GeneratedReport } from '@/types';
 import { Database } from './types';
 
 type DBMeeting = Database['public']['Tables']['meetings']['Row'];
@@ -52,6 +52,22 @@ export function mapSupabaseToReportSettings(settings: any): ReportSettings {
   return {
     style: (settings.style as 'executive' | 'detailed' | 'client-friendly' | 'technical') ?? 'executive',
     additionalPrompt: settings.additional_prompt ?? ""
+  };
+}
+
+export function mapSupabaseToGeneratedReport(report: any): GeneratedReport {
+  if (!report) {
+    return {
+      content: '',
+      file_path: '',
+      created_at: ''
+    };
+  }
+
+  return {
+    content: report.content,
+    file_path: report.file_path,
+    created_at: report.created_at
   };
 }
 
