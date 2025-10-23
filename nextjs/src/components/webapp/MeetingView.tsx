@@ -107,18 +107,7 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              onClick={onBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Meetings
-            </Button>
-          </div>
-          
+        <div className="mb-6">          
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
               <div className="flex-1">

@@ -115,8 +115,8 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
 
     try {
       const supabase = await createSPASassClient();
-      const dbUpdates = mapTaskToSupabase(updates);
-      await supabase.updateTask(taskId, dbUpdates);
+      //const dbUpdates = mapTaskToSupabase(updates);
+      await supabase.updateTask(taskId, updates);
     } catch (err) {
       console.error('Error updating task:', err);
     }
@@ -129,7 +129,7 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
           onClick={onBack}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Meetings
+          <ArrowLeft className="w-4 h-4" /> Back to meeting {meetingTitle}
         </Button>
       </div>
     );
@@ -141,15 +141,7 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to {meetingTitle}
-          </Button>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.name}</h1>
             <p className="text-gray-600 mb-4">{project.description}</p>

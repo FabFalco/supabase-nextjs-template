@@ -4,10 +4,45 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 import PricingService from "@/lib/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+
+const supabase = await createSPASassClient();
+const client = supabase.getSupabaseClient();
 
 const HomePricing = () => {
     const tiers = PricingService.getAllTiers();
     const commonFeatures = PricingService.getCommonFeatures();
+
+    const handleGetStarted = async (tierName: string, priceId: string) => {
+    try {
+      const {
+        data: { session },
+      } = await client.auth.getSession();
+
+      if (session) {
+        // 🔹 Utilisateur connecté → démarrer le checkout Stripe
+        const res = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(priceId),
+        });
+
+        if (!res.ok) throw new Error("Checkout failed");
+        const data = await res.json();
+
+        if (data.url) {
+          window.location.href = data.url; // 🔁 redirection Stripe Checkout
+        }
+      } else {
+        // 🔹 Pas connecté → rediriger vers /auth/register avec callback
+        const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe`;
+        window.location.href = redirectUrl;
+      }
+    } catch (err) {
+      console.error("Error starting checkout:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  };
 
     return (
         <section id="pricing" className="py-24 bg-gray-100">
@@ -29,7 +64,7 @@ const HomePricing = () => {
                                 <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-primary-500 text-white text-sm rounded-full">
                                     Most Popular
                                 </div>
-                            )}
+                            )}  
 
                             <CardHeader>
                                 <CardTitle>{tier.name}</CardTitle>
@@ -51,16 +86,16 @@ const HomePricing = () => {
                                     ))}
                                 </ul>
 
-                                <Link
-                                    href="/auth/register"
+                                <button
+                                    onClick={() => handleGetStarted(tier.name, tier.priceId)}
                                     className={`w-full text-center px-6 py-3 rounded-lg font-medium transition-colors ${
                                         tier.popular
-                                            ? 'bg-primary-600 text-white hover:bg-primary-700'
-                                            : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
+                                        ? "bg-primary-600 text-white hover:bg-primary-700"
+                                        : "bg-gray-50 text-gray-900 hover:bg-gray-100"
                                     }`}
-                                >
+                                    >
                                     Get Started
-                                </Link>
+                                </button>
                             </CardContent>
                         </Card>
                     ))}

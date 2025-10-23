@@ -16,7 +16,7 @@ import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/s
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard/ui/avatar';
 
-export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">'Meeting Reports'</h1>) }) {
+export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">Meeting Reports</h1>) }) {
   const router = useRouter();
   const { user } = useGlobal();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -45,7 +45,7 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
       <div className="container mx-auto px-4 py-3 max-w-7xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+            {title}
           </div>
 
           <div className="flex items-center gap-4">

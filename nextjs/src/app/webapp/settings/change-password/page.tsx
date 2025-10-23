@@ -62,20 +62,23 @@ export default function ChangePasswordPage() {
     }
   };
 
+  const buttonBack = (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/webapp')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Home
+            </Button>
+          </div>
+        );
+
   return (
     <>
-      <TopNavBar />
+      <TopNavBar title = {buttonBack}/>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
         <div className="container mx-auto px-4 max-w-2xl">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/webapp')}
-            className="mb-6 flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Button>
-
           <Card className="bg-white">
             <CardHeader>
               <div className="flex items-center gap-3">
