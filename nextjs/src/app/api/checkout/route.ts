@@ -10,6 +10,9 @@ export async function POST(req: Request) {
   const supabase = await createSSRSassClient()
   const client = supabase.getSupabaseClient()
   const { data: { user } } = await client.auth.getUser()
+  
+  console.log(priceId);
+  console.log(user);
 
   if (!user) return new Response("Unauthorized", { status: 401 })
 
@@ -21,6 +24,7 @@ export async function POST(req: Request) {
     .single()
 
   let customerId = profile?.stripe_customer_id
+  console.log(customerId);
 
   if (!customerId) return new Response("Unauthorized Stripe", { status: 401 })
 
@@ -28,9 +32,11 @@ export async function POST(req: Request) {
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: "price_1SH17kRukCqEibod9Z4M5rv6", quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/cancel`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/webapp/settings/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/webapp/settings/stripe/cancel`,
   })
 
+  console.log(session);
+  
   return new Response(JSON.stringify({ url: session.url }))
 }

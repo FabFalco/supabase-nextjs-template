@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-09-30.clover"
 })
 
-export const dynamic = "force-dynamic"; // ✅ important pour Next.js 15+
+//export const dynamic = "force-dynamic"; // ✅ important pour Next.js 15+
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url)
@@ -20,8 +20,9 @@ export async function GET(request: Request) {
 
     const supabase = await createSSRSassClient()
     const client = supabase.getSupabaseClient()
-
+    
     // Exchange the code for a session
+    //await supabase.exchangeCodeForSession(code)
     const { data: sessionData, error: sessionError } = await supabase.exchangeCodeForSession(code)
     if (sessionError) {
         console.error("Session exchange error:", sessionError);
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
 
     const user = sessionData?.user;
     if (!user) {
+        console.error("Not User in session exchange");
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
@@ -46,6 +48,9 @@ export async function GET(request: Request) {
         return NextResponse.redirect(new URL('/auth/2fa', request.url))
     }
 
+    console.log("Récupère ton profil Supabase");
+    console.log(user);
+
     // Récupère ton profil Supabase (ou table users/profiles)
     const { data: profile } = await client
         .from("profiles")
@@ -53,8 +58,10 @@ export async function GET(request: Request) {
         .eq("id", user.id)
         .single();
 
+    console.log(profile);
     // Si pas encore de client Stripe, on le crée
     if (!profile?.stripe_customer_id) {
+        console.log("Si pas encore de client Stripe, on le crée");
         const customer = await stripe.customers.create({
         email: user.email!,
         name: user.user_metadata?.full_name || user.email,
@@ -63,11 +70,15 @@ export async function GET(request: Request) {
         },
         });
 
+        console.log(customer);
+
         // On sauvegarde le Stripe ID dans Supabase
         await client
         .from("profiles")
         .update({ stripe_customer_id: customer.id })
         .eq("id", user.id);
+
+        console.log("On sauvegarde le Stripe ID dans Supabase");
     }
 
     // If MFA is not required or already verified, proceed to app

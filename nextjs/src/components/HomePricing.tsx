@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 import PricingService from "@/lib/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import { createSPASassClient } from '@/lib/supabase/client';
 
-const supabase = await createSPASassClient();
-const client = supabase.getSupabaseClient();
+//const supabase = await createSPASassClient();
+//const client = supabase.getSupabaseClient();
 
 const HomePricing = () => {
     const tiers = PricingService.getAllTiers();
@@ -15,11 +15,12 @@ const HomePricing = () => {
 
     const handleGetStarted = async (tierName: string, priceId: string) => {
     try {
-      const {
+      /*const {
         data: { session },
-      } = await client.auth.getSession();
+      } = await client.auth.getSession();*/
 
-      if (session) {
+      //console.log(session);
+      //if (session) {
         // 🔹 Utilisateur connecté → démarrer le checkout Stripe
         const res = await fetch("/api/checkout", {
           method: "POST",
@@ -27,17 +28,20 @@ const HomePricing = () => {
           body: JSON.stringify(priceId),
         });
 
-        if (!res.ok) throw new Error("Checkout failed");
+        //if (!res.ok) throw new Error("Checkout failed");
         const data = await res.json();
 
         if (data.url) {
+          console.log(data.url)
           window.location.href = data.url; // 🔁 redirection Stripe Checkout
+        } else {
+          alert(data.error || "Unable to start checkout");
         }
-      } else {
+      /*} else {
         // 🔹 Pas connecté → rediriger vers /auth/register avec callback
         const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe`;
         window.location.href = redirectUrl;
-      }
+      }*/
     } catch (err) {
       console.error("Error starting checkout:", err);
       alert("Something went wrong. Please try again.");
