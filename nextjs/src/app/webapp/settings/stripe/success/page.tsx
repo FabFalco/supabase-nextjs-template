@@ -43,7 +43,7 @@ export default function CheckoutSuccessPage() {
         <>
           <h1 className="text-2xl font-bold text-red-600">❌ Payment Verification Failed</h1>
           <p>Something went wrong while confirming your payment.</p>
-          <a href="/webapp/settings/checkout" className="mt-4 px-4 py-2 bg-gray-200 rounded">
+          <a href="/webapp/settings/stripe" className="mt-4 px-4 py-2 bg-gray-200 rounded">
             Try Again
           </a>
         </>

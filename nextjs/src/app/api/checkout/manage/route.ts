@@ -6,12 +6,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 export async function POST(req: Request) {
-  const { priceId } = await req.json()
   const supabase = await createSSRSassClient()
   const client = supabase.getSupabaseClient()
   const { data: { user } } = await client.auth.getUser()
   
-  console.log(priceId);
   //console.log(user);
 
   if (!user) return new Response("Unauthorized", { status: 401 })
@@ -28,16 +26,12 @@ export async function POST(req: Request) {
 
   if (!customerId) return new Response("Unauthorized Stripe", { status: 401 })
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    //payment_method_types: ['card'],
+  const portalSession = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/webapp/settings/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/webapp/settings/stripe/cancel`,
-  })
+    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/webapp/settings/stripe/management`,
+  });
 
-  console.log(session);
-  
-  return new Response(JSON.stringify({ url: session.url }))
+  console.log(portalSession);
+
+  return new Response(JSON.stringify({ url: portalSession.url }))
 }

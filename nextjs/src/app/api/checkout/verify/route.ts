@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   if (!sessionId) return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
 
   const session = await stripe.checkout.sessions.retrieve(sessionId);
+  console.log(session);
   if (session.payment_status !== "paid") {
     return NextResponse.json({ error: "Payment not confirmed" }, { status: 400 });
   }
@@ -19,14 +20,12 @@ export async function GET(request: Request) {
   const client = supabase.getSupabaseClient()
   const userId = session.metadata?.user_id;
 
-  console.log(session);
-
   // session.payment_status
-  /*if (userId) {
+  if (userId) {
     await client.from("profiles").update({
       subscription_status: session.metadata?.plan_id,
     }).eq("id", userId);
-  }*/
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -40,6 +40,10 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
     router.push('/webapp/settings/stripe');
   };
 
+  const handleManageStripeSettings = () => {
+    router.push('/webapp/settings/stripe/management');
+  };
+
   return (
     <div className="bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto px-4 py-3 max-w-7xl">
@@ -79,6 +83,11 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
                     <DropdownMenuItem onClick={handleStripeSettings}>
                       <CreditCard className="w-4 h-4 mr-2" />
                       Stripe Settings
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={handleManageStripeSettings}>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Manage Stripe Settings
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />

@@ -6,11 +6,11 @@ import PricingService from "@/lib/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
 
-const HomePricing = () => {
-    const tiers = PricingService.getAllTiers();
+const ManagementPricing = () => {
+    const tiers = PricingService.getTier("Pro");
     const commonFeatures = PricingService.getCommonFeatures();
 
-    const handleGetStarted = async (tierName: string, priceId: string) => {
+    const handleManagePlan = async (tierName: string, priceId: string) => {
         if(priceId === 'null') return;
 
         const supabase = await createSPASassClient();
@@ -23,7 +23,7 @@ const HomePricing = () => {
         console.log(priceId);
         if (session) {
             // 🔹 Utilisateur connecté → démarrer le checkout Stripe
-            const res = await fetch("/api/checkout", {
+            const res = await fetch("/api/checkout/manage", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({priceId}),
@@ -40,7 +40,7 @@ const HomePricing = () => {
             }
         } else {
             // 🔹 Pas connecté → rediriger vers /auth/register avec callback
-            const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe`;
+            const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe/management`;
             window.location.href = redirectUrl;
         }
         } catch (err) {
@@ -92,14 +92,14 @@ const HomePricing = () => {
                                 </ul>
 
                                 <button
-                                    onClick={() => handleGetStarted(tier.name, tier.priceId)}
+                                    onClick={() => handleManagePlan(tier.name, tier.priceId)}
                                     className={`w-full text-center px-6 py-3 rounded-lg font-medium transition-colors ${
                                         tier.popular
                                         ? "bg-primary-600 text-white hover:bg-primary-700"
                                         : "bg-gray-50 text-gray-900 hover:bg-gray-100"
                                     }`}
                                     >
-                                    Get Started
+                                    Manage your plan
                                 </button>
                             </CardContent>
                         </Card>
@@ -116,4 +116,4 @@ const HomePricing = () => {
     );
 };
 
-export default HomePricing;
+export default ManagementPricing;

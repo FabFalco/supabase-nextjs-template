@@ -35,6 +35,13 @@ class PricingService {
         return this.tiers;
     }
 
+    static getTier(nom: string): PricingTier[] {
+        if (this.tiers.length === 0) {
+            this.initialize();
+        }
+        return this.tiers.filter((element) => element.name==nom);
+    }
+
     static getCommonFeatures(): string[] {
         return process.env.NEXT_PUBLIC_COMMON_FEATURES?.split(',') || [];
     }
