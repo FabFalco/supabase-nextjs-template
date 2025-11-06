@@ -39,28 +39,34 @@ export type Database = {
           id: string
           full_name: string | null
           avatar_url: string | null
-          subscription_status: string
+          subscription_plan_id: string | null
           stripe_customer_id: string | null
           created_at: string
           updated_at: string
+          stripe_subscription_id: string | null
+          subscription_status: string
         }
         Insert: {
           id: string
           full_name?: string | null
           avatar_url?: string | null
-          subscription_status?: string
+          subscription_plan_id?: string | null
           stripe_customer_id?: string | null
           created_at?: string
           updated_at?: string
+          stripe_subscription_id: string | null
+          subscription_status: string
         }
         Update: {
           id?: string
           full_name?: string | null
           avatar_url?: string | null
-          subscription_status?: string
+          subscription_plan_id?: string | null
           stripe_customer_id?: string | null
           created_at?: string
           updated_at?: string
+          stripe_subscription_id: string | null
+          subscription_status: string
         }
       }
       meetings: {

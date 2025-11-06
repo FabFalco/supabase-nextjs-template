@@ -9,7 +9,9 @@ export async function GET(request: Request) {
   const sessionId = searchParams.get("session_id");
   if (!sessionId) return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
 
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ["subscription"],
+  });
   console.log(session);
   if (session.payment_status !== "paid") {
     return NextResponse.json({ error: "Payment not confirmed" }, { status: 400 });
@@ -19,11 +21,18 @@ export async function GET(request: Request) {
   const supabase = await createSSRSassClient();
   const client = supabase.getSupabaseClient()
   const userId = session.metadata?.user_id;
+  const planId = session.metadata?.price_id;
+  const subscription = session.subscription as Stripe.Subscription;
 
+  console.log(userId);
+  console.log(planId);
+  console.log(subscription);
   // session.payment_status
   if (userId) {
     await client.from("profiles").update({
-      subscription_status: session.metadata?.plan_id,
+      stripe_subscription_id: subscription.id,
+      subscription_plan_id: planId,
+      subscription_status: subscription.status,
     }).eq("id", userId);
   }
 
