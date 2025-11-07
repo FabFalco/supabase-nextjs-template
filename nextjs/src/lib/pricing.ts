@@ -13,7 +13,7 @@ class PricingService {
     static initialize() {
         const names = process.env.NEXT_PUBLIC_TIERS_NAMES?.split(',') || [];
         const prices = process.env.NEXT_PUBLIC_TIERS_PRICES?.split(',').map(Number) || [];
-        const pricesId = process.env.NEXT_PUBLIC_TIERS_PRICESID?.split(',') || [];
+        const pricesId = process.env.STRIPE_PRIVATE_TIERS_PRICESID?.split(',') || [];
         const descriptions = process.env.NEXT_PUBLIC_TIERS_DESCRIPTIONS?.split(',') || [];
         const features = process.env.NEXT_PUBLIC_TIERS_FEATURES?.split(',').map(f => f.split('|')) || [];
         const popularTier = process.env.NEXT_PUBLIC_POPULAR_TIER;

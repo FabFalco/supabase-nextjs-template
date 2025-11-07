@@ -9,6 +9,8 @@ export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature")!
   const body = await req.text()
 
+  console.log(body);
+
   try {
     const event = stripe.webhooks.constructEvent(
       body,
@@ -58,6 +60,10 @@ export async function POST(req: Request) {
         // Unexpected event type
         console.log(`Unhandled event type ${event.type}.`);
     }*/
+
+    console.log(event.type);
+    console.log(event);
+    
 
     if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
       const subscription = event.data.object as Stripe.Subscription

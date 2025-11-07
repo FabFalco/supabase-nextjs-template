@@ -26,7 +26,8 @@ export async function GET(request: Request) {
 
   console.log(userId);
   console.log(planId);
-  console.log(subscription);
+  console.log(subscription.id);
+  console.log(subscription.status);
   // session.payment_status
   if (userId) {
     await client.from("profiles").update({
