@@ -251,6 +251,25 @@ export class SassClient {
         return this.client.from('todo_list').update({done: true}).eq('id', id)
     }
 
+    async updateUserSubscription(stripeCustomerId: string, subscriptionData: {
+        subscription_status: string,
+        subscription_plan_id: string | null,
+        stripe_subscription_id: string | null
+    }) {
+        return this.client
+            .from('profiles')
+            .update(subscriptionData)
+            .eq('stripe_customer_id', stripeCustomerId);
+    }
+
+    async getUserSubscription(stripeCustomerId: string) {
+        return this.client
+            .from('profiles')
+            .select('id, subscription_status, subscription_plan_id, stripe_subscription_id')
+            .eq('stripe_customer_id', stripeCustomerId)
+            .maybeSingle();
+    }
+
     getSupabaseClient() {
         return this.client;
     }
