@@ -14,7 +14,7 @@ import {
 import { User, LogOut, Key, CreditCard } from 'lucide-react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/webapp/ui/avatar';
 
 export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">Meeting Reports</h1>) }) {
   const router = useRouter();
