@@ -161,7 +161,7 @@ export default function Home() {
               Join thousands of developers building their SaaS with {productName}
             </p>
             <Link
-                href="/auth/register"
+                href="/webapp"
                 className="mt-8 inline-flex items-center px-6 py-3 rounded-lg bg-white text-primary-600 font-medium hover:bg-primary-50 transition-colors"
             >
               Get Started Now

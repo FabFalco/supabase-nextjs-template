@@ -17,7 +17,6 @@ export async function createSPASassClient() {
 export async function createSPASassClientAuthenticated() {
     const client = createSPAClient();
     const user = await client.auth.getSession();
-    console.log(client.auth);
     if (!user.data || !user.data.session) {
         //window.location.href = '/auth/login';
         console.log("User not connected...");
