@@ -12,7 +12,7 @@ import MeetingView from '@/components/webapp/MeetingView';
 import CreateMeetingDialog from '@/components/webapp/CreateMeetingDialog';
 import { Meeting } from '@/types';
 import TopNavBar from '@/components/webapp/TopNavBar';
-import { Database } from '@/lib/types';
+import { Database } from '@/types/database';
 import { mapSupabaseToMeetings } from '@/lib/mapper'
 
 type Meetings = Database['public']['Tables']['meetings']['Row'];
