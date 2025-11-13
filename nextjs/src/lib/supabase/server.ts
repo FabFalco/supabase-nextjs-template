@@ -1,7 +1,7 @@
 import {createServerClient} from '@supabase/ssr'
 import {cookies} from 'next/headers'
 import {ClientType, SassClient} from "@/lib/supabase/unified";
-import {Database} from "@/types/database";
+import {Database} from "@/lib/types";
 
 export async function createSSRClient() {
     const cookieStore = await cookies()

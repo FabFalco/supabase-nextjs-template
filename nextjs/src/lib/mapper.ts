@@ -1,5 +1,5 @@
-import { Meeting, Project, Task, ReportSettings } from '@/types';
-import { Database } from '@/types/database';
+import { Meeting, Project, Task, ReportSettings, GeneratedReport } from '@/types';
+import { Database } from './types';
 
 type DBMeeting = Database['public']['Tables']['meetings']['Row'];
 type DBProject = Database['public']['Tables']['projects']['Row'];

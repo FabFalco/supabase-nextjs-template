@@ -1,5 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
-import {Database} from "@/types/database";
+import {Database} from "@/lib/types";
 
 export async function createServerAdminClient() {
 
