@@ -1,12 +1,11 @@
 import {createServerClient} from '@supabase/ssr'
 import {cookies} from 'next/headers'
 import {ClientType, SassClient} from "@/lib/supabase/unified";
-import {Database} from "@/lib/types";
 
 export async function createSSRClient() {
     const cookieStore = await cookies()
 
-    return createServerClient<Database>(
+    return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
@@ -29,8 +28,6 @@ export async function createSSRClient() {
         }
     )
 }
-
-
 
 export async function createSSRSassClient() {
     const client = await createSSRClient();
