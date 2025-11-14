@@ -1,5 +1,5 @@
 import Stripe from "stripe"
-import { createSSRSassClient } from "@/lib/supabase/server"
+import { createServerAdminClient } from "@/lib/supabase/serverAdminClient"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-10-29.clover"
@@ -78,8 +78,7 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     )
 
-    const supabase = await createSSRSassClient()
-    const client = supabase.getSupabaseClient()
+    const client = await createServerAdminClient()
 
     switch (event.type) {
       case "customer.subscription.created": {
