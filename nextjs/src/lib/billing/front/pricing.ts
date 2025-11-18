@@ -1,4 +1,5 @@
 export interface PricingTier {
+    key: string;
     name: string;
     price: number;
     priceId: string;
@@ -19,6 +20,7 @@ class PricingService {
         const popularTier = process.env.NEXT_PUBLIC_POPULAR_TIER;
 
         this.tiers = names.map((name, index) => ({
+            key: name.toLowerCase(),
             name,
             price: prices[index],
             priceId: pricesId[index],

@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
-import PricingService from "@/lib/pricing";
+import PricingService from "@/lib/billing/front/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
 
@@ -10,42 +10,41 @@ const HomePricing = () => {
     const tiers = PricingService.getAllTiers();
     const commonFeatures = PricingService.getCommonFeatures();
 
-    const handleGetStarted = async (tierName: string, priceId: string) => {
-        if(priceId === 'null') return;
+    const handleGetStarted = async (plan: string, price: number) => {
+        if(price === 0) return;
 
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
         try {
-        const {
-            data: { session },
-        } = await client.auth.getSession();
+            const {
+                data: { session },
+            } = await client.auth.getSession();
 
-        console.log(priceId);
-        if (session) {
-            // 🔹 Utilisateur connecté → démarrer le checkout Stripe
-            const res = await fetch("/api/checkout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({priceId}),
-            });
+            if (session) {
+                // 🔹 Utilisateur connecté → démarrer le checkout Stripe
+                const res = await fetch("/api/checkout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json"},
+                    body: JSON.stringify({ plan }),
+                });
 
-            if (!res.ok) throw new Error("Checkout failed");
-            const data = await res.json();
+                if (!res.ok) throw new Error("Checkout failed");
+                const data = await res.json();
 
-            if (data.url) {
-            console.log(data.url)
-            window.location.href = data.url; // 🔁 redirection Stripe Checkout
+                if (data.url) {
+                    console.log(data.url)
+                    window.location.href = data.url; // 🔁 redirection Stripe Checkout
+                } else {
+                    alert(data.error || "Unable to start checkout");
+                }
             } else {
-            alert(data.error || "Unable to start checkout");
+                // 🔹 Pas connecté → rediriger vers /auth/register avec callback
+                const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe`;
+                window.location.href = redirectUrl;
             }
-        } else {
-            // 🔹 Pas connecté → rediriger vers /auth/register avec callback
-            const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe`;
-            window.location.href = redirectUrl;
-        }
         } catch (err) {
-        console.error("Error starting checkout:", err);
-        alert("Something went wrong. Please try again.");
+            console.error("Error starting checkout:", err);
+            alert("Something went wrong. Please try again.");
         }
     };
 
@@ -92,7 +91,7 @@ const HomePricing = () => {
                                 </ul>
 
                                 <button
-                                    onClick={() => handleGetStarted(tier.name, tier.priceId)}
+                                    onClick={() => handleGetStarted(tier.key, tier.price)}
                                     className={`w-full text-center px-6 py-3 rounded-lg font-medium transition-colors ${
                                         tier.popular
                                         ? "bg-primary-600 text-white hover:bg-primary-700"

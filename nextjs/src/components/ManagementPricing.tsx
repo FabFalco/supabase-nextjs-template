@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
-import PricingService from "@/lib/pricing";
+import PricingService from "@/lib/billing/front/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
 
@@ -10,8 +10,8 @@ const ManagementPricing = () => {
     const tiers = PricingService.getTier("Pro");
     const commonFeatures = PricingService.getCommonFeatures();
 
-    const handleManagePlan = async (tierName: string, priceId: string) => {
-        if(priceId === 'null') return;
+    const handleManagePlan = async (tierName: string, price: number) => {
+        //if(price === 0) return;
 
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
@@ -20,13 +20,13 @@ const ManagementPricing = () => {
             data: { session },
         } = await client.auth.getSession();
 
-        console.log(priceId);
+        console.log(tierName);
         if (session) {
             // 🔹 Utilisateur connecté → démarrer le checkout Stripe
             const res = await fetch("/api/checkout/manage", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({priceId}),
+            body: JSON.stringify({tierName}),
             });
 
             if (!res.ok) throw new Error("Checkout failed");
@@ -92,7 +92,7 @@ const ManagementPricing = () => {
                                 </ul>
 
                                 <button
-                                    onClick={() => handleManagePlan(tier.name, tier.priceId)}
+                                    onClick={() => handleManagePlan(tier.name, tier.price)}
                                     className={`w-full text-center px-6 py-3 rounded-lg font-medium transition-colors ${
                                         tier.popular
                                         ? "bg-primary-600 text-white hover:bg-primary-700"
