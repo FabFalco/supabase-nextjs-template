@@ -1,29 +1,66 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Check, Loader as Loader2 } from 'lucide-react';
+import { Check } from 'lucide-react';
 import PricingService from "@/lib/billing/front/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Loader as Loader2 } from 'lucide-react';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
+import { PricingTier } from '@/lib/billing/front/pricing';
 
 
 const ManagementPricing = () => {
-    const tiers = PricingService.getAllTiers();
+    /*const { user } = useGlobal();
+    // Sécurisation : fallback si user ou user.plan pas chargé
+    const plan = user?.plan ?? "Pro";
+
+    const tiers = PricingService.getTier(plan);*/
     const commonFeatures = PricingService.getCommonFeatures();
     
     const { user } = useGlobal(); // peut être undefined au début
     const [planKey, setPlanKey] = useState<string | null>(null);
+    const [tiers, setTiers] = useState<PricingTier[]>([]);
+    //const [commonFeatures, setCommonFeatures] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Dès que user change, on met à jour planKey
     useEffect(() => {
-        setLoading(true);
-        // sécurité : user peut être null/undefi
-        // ned ou avoir plan undefined
+        // sécurité : user peut être null/undefined ou avoir plan undefined
         const p = user?.plan ?? null;
         setPlanKey(p);
-        setLoading(false);
     }, [user]);
+
+    // charge les tiers quand planKey est disponible (ou fallback)
+    useEffect(() => {
+        let mounted = true;
+
+        async function loadTiers() {
+        setLoading(true);
+        try {
+            // PricingService.getTier peut retourner un array ou un objet. On gère les deux cas.
+            const result = await PricingService.getTier(planKey);
+            const normalized = Array.isArray(result) ? result : [result];
+            //const features = await PricingService.getCommonFeatures?.() ?? [];
+            if (!mounted) return;
+            setTiers(normalized);
+            //setCommonFeatures(features);
+        } catch (err) {
+            console.error("Erreur lors du chargement des tiers :", err);
+            if (mounted) {
+            setTiers([]); // safe fallback
+            //setCommonFeatures([]);
+            }
+        } finally {
+            if (mounted) setLoading(false);
+        }
+        }
+
+        loadTiers();
+
+        return () => {
+        mounted = false;
+        };
+    }, [planKey]);
 
     const handleManagePlan = async (tierName: string, price: number) => {
         //if(price === 0) return;
@@ -35,7 +72,6 @@ const ManagementPricing = () => {
             data: { session },
         } = await client.auth.getSession();
 
-        console.log(tierName);
         if (session) {
             // 🔹 Utilisateur connecté → démarrer le checkout Stripe
             const res = await fetch("/api/checkout/manage", {
@@ -48,7 +84,6 @@ const ManagementPricing = () => {
             const data = await res.json();
 
             if (data.url) {
-            console.log(data.url)
             window.location.href = data.url; // 🔁 redirection Stripe Checkout
             } else {
             alert(data.error || "Unable to start checkout");
@@ -81,14 +116,16 @@ const ManagementPricing = () => {
                         <Card
                             key={tier.name}
                             className={`relative flex flex-col ${
-                                tier.key == planKey ? 'border-primary-500 shadow-lg' : ''
+                                /*tier.popular ? */'border-primary-500 shadow-lg'/* : ''*/
                             }`}
                         >
-                            {tier.key == planKey ? (
+                            {tier.popular ? (
                                 <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-primary-500 text-white text-sm rounded-full">
-                                    Your plan
+                                    Most Popular
                                 </div>
-                            ) : ''
+                            ) : <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-primary-500 text-white text-sm rounded-full">
+                                    Your choice
+                                </div>
                             }  
 
                             <CardHeader>
@@ -114,14 +151,12 @@ const ManagementPricing = () => {
                                 <button
                                     onClick={() => handleManagePlan(tier.name, tier.price)}
                                     className={`w-full text-center px-6 py-3 rounded-lg font-medium transition-colors ${
-                                        tier.key == planKey
-                                        ? "bg-primary-600 text-white hover:bg-primary-700"
-                                        : "bg-gray-50 text-gray-900 hover:bg-gray-100"
+                                        /*tier.popular
+                                        ? */"bg-primary-600 text-white hover:bg-primary-700"
+                                        /*: "bg-gray-50 text-gray-900 hover:bg-gray-100"*/
                                     }`}
                                     >
-                                    {tier.key == planKey
-                                        ? "Manage your plan" : "Change your plan"
-                                    }
+                                    Manage your plan
                                 </button>
                             </CardContent>
                         </Card>

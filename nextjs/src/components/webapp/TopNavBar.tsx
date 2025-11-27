@@ -20,6 +20,19 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
   const router = useRouter();
   const { user } = useGlobal();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  let stripeMenu;
+
+  if (user?.plan === 'pro' || user?.plan === 'enterprise') {
+    stripeMenu = <DropdownMenuItem onClick={() => {router.push('/webapp/settings/stripe/management');}}>
+      <CreditCard className="w-4 h-4 mr-2" />
+      Manage Stripe Settings
+    </DropdownMenuItem>
+  } else {
+    stripeMenu = <DropdownMenuItem onClick={() => {router.push('/webapp/settings/stripe');}}>
+      <CreditCard className="w-4 h-4 mr-2" />
+      Stripe Settings
+    </DropdownMenuItem>
+  }
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -79,17 +92,8 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
                       <Key className="w-4 h-4 mr-2" />
                       Change Password
                     </DropdownMenuItem>
-                    
-                    <DropdownMenuItem onClick={handleStripeSettings}>
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Stripe Settings
-                    </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleManageStripeSettings}>
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Manage Stripe Settings
-                    </DropdownMenuItem>
-                    
+                    { stripeMenu }
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem

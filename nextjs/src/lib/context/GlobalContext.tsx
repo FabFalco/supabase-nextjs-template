@@ -9,6 +9,7 @@ type User = {
     email: string;
     id: string;
     registered_at: Date;
+    plan: string | null;
 };
 
 interface GlobalContextType {
@@ -31,11 +32,28 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                 // Get user data
                 const { data: { user } } = await client.auth.getUser();
                 if (user) {
-                    setUser({
-                        email: user.email!,
-                        id: user.id,
-                        registered_at: new Date(user.created_at)
-                    });
+                    // Récupère ton profil Supabase (ou table users/profiles)
+                    const { data: profile } = await client
+                        .from("profiles")
+                        .select("subscription_status")
+                        .eq("id", user.id)
+                        .single();
+                    
+                    if(profile?.subscription_status) {
+                        setUser({
+                            email: user.email!,
+                            id: user.id,
+                            registered_at: new Date(user.created_at),
+                            plan: (profile?.subscription_status)
+                        });
+                    } else {
+                        setUser({
+                            email: user.email!,
+                            id: user.id,
+                            registered_at: new Date(user.created_at),
+                            plan: "free"
+                        });
+                    }                    
                 } else {
                     throw new Error('User not found');
                 }

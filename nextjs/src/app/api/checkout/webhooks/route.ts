@@ -1,5 +1,6 @@
 import Stripe from "stripe"
 import { createServerAdminClient } from "@/lib/supabase/serverAdminClient"
+import PlanService from "@/lib/billing/back/plans";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-10-29.clover"
@@ -11,19 +12,21 @@ async function updateSubscriptionInDatabase(
   subscription: Stripe.Subscription
 ) {
   const priceId = subscription.items.data[0]?.price.id || null;
+  const planKey = PlanService.getPlanKey(priceId);
   const subscriptionId = subscription.id;
   const status = subscription.status;
 
   console.log(`Updating subscription for customer ${customerId}:`, {
-    priceId,
     subscriptionId,
+    planKey,
+    priceId,
     status
   });
 
   await client
     .from("profiles")
     .update({
-      subscription_status: status,
+      subscription_status: planKey,
       subscription_plan_id: priceId,
       stripe_subscription_id: subscriptionId
     })
@@ -60,7 +63,7 @@ async function handleSubscriptionDeleted(
   await client
     .from("profiles")
     .update({
-      subscription_status: subscription.status,
+      subscription_status: "free",
       subscription_plan_id: null,
       stripe_subscription_id: null
     })

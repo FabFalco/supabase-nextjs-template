@@ -22,6 +22,8 @@ export async function GET(request: Request) {
   const client = supabase.getSupabaseClient()
   const userId = session.metadata?.user_id;
   const planId = session.metadata?.price_id;
+  const planKey = session.metadata?.planKey;
+
   const subscription = session.subscription as Stripe.Subscription;
 
   console.log(userId);
@@ -33,7 +35,7 @@ export async function GET(request: Request) {
     await client.from("profiles").update({
       stripe_subscription_id: subscription.id,
       subscription_plan_id: planId,
-      subscription_status: subscription.status,
+      subscription_status: planKey,
     }).eq("id", userId);
   }
 

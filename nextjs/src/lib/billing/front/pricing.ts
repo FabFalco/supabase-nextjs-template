@@ -20,7 +20,7 @@ class PricingService {
         const popularTier = process.env.NEXT_PUBLIC_POPULAR_TIER;
 
         this.tiers = names.map((name, index) => ({
-            key: name.toLowerCase(),
+            key: name.toLowerCase(), // "Free" → "free"
             name,
             price: prices[index],
             priceId: pricesId[index],
@@ -37,11 +37,12 @@ class PricingService {
         return this.tiers;
     }
 
-    static getTier(nom: string): PricingTier[] {
+    static getTier(planKey: string | null): PricingTier[] {
+        if (planKey === null) return [];
         if (this.tiers.length === 0) {
             this.initialize();
         }
-        return this.tiers.filter((element) => element.name==nom);
+        return this.tiers.filter((element) => element.key==planKey);
     }
 
     static getCommonFeatures(): string[] {

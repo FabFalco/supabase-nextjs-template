@@ -1,6 +1,6 @@
 import Stripe from "stripe"
 import { createSSRSassClient } from "@/lib/supabase/server"
-import { getPlans } from "@/lib/billing/back/plans";
+import PlanService from "@/lib/billing/back/plans";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-10-29.clover"
@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   const { plan } = await req.json();
-  const plans = getPlans();
+  const plans = PlanService.getPlans();
   const supabase = await createSSRSassClient()
   const client = supabase.getSupabaseClient()
   const { data: { user } } = await client.auth.getUser()
@@ -44,6 +44,7 @@ export async function POST(req: Request) {
     metadata: {
       user_id: user.id,
       price_id: stripePriceId,
+      planKey: plan,
     },
   })
   
