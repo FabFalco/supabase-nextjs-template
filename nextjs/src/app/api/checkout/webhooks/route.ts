@@ -63,7 +63,7 @@ async function handleSubscriptionDeleted(
   await client
     .from("profiles")
     .update({
-      subscription_status: "free",
+      subscription_status: PlanService.getFreePlanKey(),
       subscription_plan_id: null,
       stripe_subscription_id: null
     })

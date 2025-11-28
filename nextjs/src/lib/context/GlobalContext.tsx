@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import PricingService from "@/lib/billing/front/pricing";
 
 
 type User = {
@@ -51,7 +52,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                             email: user.email!,
                             id: user.id,
                             registered_at: new Date(user.created_at),
-                            plan: "free"
+                            plan: PricingService.getFreePlanKey()
                         });
                     }                    
                 } else {

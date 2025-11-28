@@ -15,6 +15,7 @@ import { User, LogOut, Key, CreditCard } from 'lucide-react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/webapp/ui/avatar';
+import PricingService from "@/lib/billing/front/pricing";
 
 export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">Meeting Reports</h1>) }) {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   let stripeMenu;
 
-  if (user?.plan === 'pro' || user?.plan === 'enterprise') {
+  if (PricingService.isPlanNotFree(user?.plan)) {
     stripeMenu = <DropdownMenuItem onClick={() => {router.push('/webapp/settings/stripe/management');}}>
       <CreditCard className="w-4 h-4 mr-2" />
       Manage Stripe Settings

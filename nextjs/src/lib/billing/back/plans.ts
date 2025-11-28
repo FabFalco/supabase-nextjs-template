@@ -5,12 +5,15 @@ export interface PlanDefinition {
   name: string;
   monthlyPrice: number;
   stripePriceId: string | null;
+  planLevel: number;
 }
 
 class PlanService {
   private static plans: PlanDefinition[] = [];
+  private static planKey: string[] = [];
 
   static initialize() {
+    const keys = process.env.NEXT_PUBLIC_TIERS_KEYS?.split(',') || [];
     const names = process.env.NEXT_PUBLIC_TIERS_NAMES?.split(",") ?? [];
     const prices = process.env.NEXT_PUBLIC_TIERS_PRICES?.split(",").map(Number) ?? [];
     const stripeIds = process.env.STRIPE_PRIVATE_TIERS_PRICESID?.split(",") ?? [];
@@ -20,11 +23,13 @@ class PlanService {
     }
 
     this.plans = names.map((name, index) => ({
-      key: name.toLowerCase(), // "Free" → "free"
+      key: keys[index],
       name,
       monthlyPrice: prices[index],
       stripePriceId: stripeIds[index] === "null" ? null : stripeIds[index],
+      planLevel: index,
     }));
+    this.planKey = keys;
   }
 
   static getPlans(): PlanDefinition[] {
@@ -41,6 +46,11 @@ class PlanService {
     if(priceId === null) return this.plans[0].key;
     return this.plans.filter((element) => element.stripePriceId==priceId)[0].key;
   }
+
+  /** Retourne la clé 0 => free*/
+    static getFreePlanKey(): string {
+        return this.planKey[0];
+    }
 }
 
 export default PlanService;
