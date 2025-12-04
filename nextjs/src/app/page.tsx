@@ -1,30 +1,31 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Globe, Shield, Users, Key, Database, Clock } from 'lucide-react';
+import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Calendar, TreeDeciduous, FolderKanban, ListTodo } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 import HomePricing from "@/components/HomePricing";
+import { Treemap } from 'recharts';
 
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
 
   const features = [
     {
-      icon: Users,
+      icon: ListTodo,
       title: 'Organize your tasks',
       description: 'Drag and drop. Easy to use.',
       color: 'text-green-600'
     },
     {
-      icon: Key,
+      icon: FolderKanban,
       title: 'See clearly instantly',
-      description: 'A summary view that structures your progress.',
+      description: 'A summary view that improves your productivity.',//A summary view that structures your progress.
       color: 'text-blue-600'
     },
     {
       icon: Clock,
       title: 'Generate your automatic summary',
       description: 'Summary, actions, blocks: all in one click.',
-      color: 'text-teal-600'
+      color: 'text-red-600'
     },
     /*{
       icon: Shield,
@@ -222,7 +223,7 @@ export default function Home() {
               Ready to Transform Your project management ?
             </h2>
             <p className="mt-4 text-xl text-primary-100">
-              Join the users who create, manage, and generate reports with {productName}
+              Join the users who save time with {productName}
             </p>
             <Link
                 href="/webapp"

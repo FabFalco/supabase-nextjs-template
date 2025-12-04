@@ -61,7 +61,7 @@ export async function GET(request: Request) {
     console.log(profile);
     // Si pas encore de client Stripe, on le crée
     if (!profile?.stripe_customer_id) {
-        console.log("Si pas encore de client Stripe, on le crée");
+        /*console.log("Si pas encore de client Stripe, on le crée");
         const customer = await stripe.customers.create({
         email: user.email!,
         name: user.user_metadata?.full_name || user.email,
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
         .update({ stripe_customer_id: customer.id })
         .eq("id", user.id);
 
-        console.log("On sauvegarde le Stripe ID dans Supabase");
+        console.log("On sauvegarde le Stripe ID dans Supabase");*/
     }
 
     // If MFA is not required or already verified, proceed to app

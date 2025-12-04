@@ -33,7 +33,29 @@ export async function POST(req: Request) {
     .single()
 
   let customerId = profile?.stripe_customer_id
-  if (!customerId) return new Response("Unauthorized Stripe", { status: 401 })
+  if (!customerId) {//return new Response("Unauthorized Stripe", { status: 401 })
+    console.log("Si pas encore de client Stripe, on le crée");
+        const customer = await stripe.customers.create({
+        email: user.email!,
+        name: user.user_metadata?.full_name || user.email,
+        metadata: {
+            supabase_user_id: user.id,
+        },
+        });
+
+        console.log(customer);
+
+        // On sauvegarde le Stripe ID dans Supabase
+        await client
+        .from("profiles")
+        .update({ stripe_customer_id: customer.id })
+        .eq("id", user.id);
+
+        // On affecte la valeur
+        customerId = customer.id;
+
+        console.log("On sauvegarde le Stripe ID dans Supabase");
+  }
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
