@@ -94,15 +94,27 @@ export default function ReportSettings({ settings, meetingId, onUpdate }: Report
     <div className="space-y-6">
       <Card className="bg-white border-0 shadow-md">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Settings className="w-5 h-5 text-purple-600" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Settings className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-gray-900">Report Settings</CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  Configure how AI generates reports from your meeting data
+                </p>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-xl text-gray-900">Report Settings</CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                Configure how AI generates reports from your meeting data
-              </p>
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanges || isSaving}
+                className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {isSaving ? 'Saving...' : hasChanges ? 'Save Settings' : 'Settings Saved'}
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -166,7 +178,7 @@ export default function ReportSettings({ settings, meetingId, onUpdate }: Report
               id="additional-prompt"
               value={localSettings.additionalPrompt}
               onChange={(e) => handlePromptChange(e.target.value)}
-              placeholder="e.g., Focus on action items and deadlines, include team responsibilities, emphasize budget considerations..."
+              placeholder="e.g., In FRENCH, focus on action items and deadlines, include team responsibilities, emphasize budget considerations..."
               className="mt-2 h-32"
             />
             <p className="text-xs text-gray-500 mt-2">
@@ -212,7 +224,7 @@ export default function ReportSettings({ settings, meetingId, onUpdate }: Report
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <Button
           onClick={handleSave}
           disabled={!hasChanges || isSaving}
@@ -221,7 +233,7 @@ export default function ReportSettings({ settings, meetingId, onUpdate }: Report
           <Save className="w-4 h-4" />
           {isSaving ? 'Saving...' : hasChanges ? 'Save Settings' : 'Settings Saved'}
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

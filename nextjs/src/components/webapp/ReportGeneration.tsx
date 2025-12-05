@@ -129,6 +129,20 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
 
     const subject = encodeURIComponent(`Meeting Report: ${meeting.title}`);
     const body = encodeURIComponent(generatedReport);
+    //let rtf = generatedReport
+    // Titres
+    //.replace(/^### (.*)$/gm, '{\\b\\fs28 $1}\\par')
+    //.replace(/^## (.*)$/gm, '{\\b\\fs36 $1}\\par')
+    //.replace(/^# (.*)$/gm, '{\\b\\fs48 $1}\\par')
+    // Italique (attention, ici **...** = italique)
+    //.replace(/\*\*(.*?)\*\*/g, '{\\i $1}')
+    // Puces
+    //.replace(/^- (.*)$/gm, '\\bullet $1\\par')
+    // Sauts de ligne
+    //.replace(/\n/g, '\n');
+
+    //const rtfBody = '{\\rtf1\\ansi\n' + rtf + '\n}';
+
     const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
     
     window.location.href = mailtoLink;
@@ -191,55 +205,6 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
             </div>
           </div>
         </CardHeader>
-      </Card>
-
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-lg text-blue-900">Report Input Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-blue-800">Meeting:</span>
-                <p className="text-blue-700">{meeting.title}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-blue-800">Date:</span>
-                <p className="text-blue-700">{new Date(meeting.date).toLocaleDateString()} at {meeting.time}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-blue-800">Projects:</span>
-                <p className="text-blue-700">{meeting.projects.length} projects</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-blue-800">Tasks:</span>
-                <p className="text-blue-700">{getCompletedTasks()}/{getTotalTasks()} completed</p>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-blue-800">Report Style:</span>
-                <Badge className="ml-2 bg-blue-100 text-blue-700">
-                  {meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}
-                </Badge>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-blue-800">Notes:</span>
-                <p className="text-blue-700">
-                  {meeting.notes ? `${meeting.notes.length} characters` : 'No notes'}
-                </p>
-              </div>
-              {meeting.reportSettings.additionalPrompt && (
-                <div>
-                  <span className="text-sm font-medium text-blue-800">Custom Instructions:</span>
-                  <p className="text-blue-700 text-sm italic">"{meeting.reportSettings.additionalPrompt}"</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
       </Card>
 
       {(isGenerating || generatedReport) && (
@@ -326,6 +291,57 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
         </Card>
       )}
 
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="text-lg text-blue-900">Report Input Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-blue-800">Meeting:</span>
+                <p className="text-blue-700">{meeting.title}</p>
+              </div>
+              {/*<div>
+                <span className="text-sm font-medium text-blue-800">Date:</span>
+                <p className="text-blue-700">{new Date(meeting.date).toLocaleDateString()} at {meeting.time}</p>
+              </div>*/}
+              <div>
+                <span className="text-sm font-medium text-blue-800">Projects:</span>
+                <p className="text-blue-700">{meeting.projects.length} projects</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-blue-800">Tasks:</span>
+                <p className="text-blue-700">{getCompletedTasks()}/{getTotalTasks()} completed</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-blue-800">Report Style:</span>
+                <Badge className="ml-2 bg-blue-100 text-blue-700">
+                  {meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}
+                </Badge>
+                <p className="text-blue-700">Write a report in style '{meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}' on the progress of the tasks listed below, highlighting key points and any potential blockers.</p>
+                {/* en {meeting.reportSettings.style.language} */}
+              </div>
+              {/*<div>
+                <span className="text-sm font-medium text-blue-800">Notes:</span>
+                <p className="text-blue-700">
+                  {meeting.notes ? `${meeting.notes.length} characters` : 'No notes'}
+                </p>
+              </div>*/}
+              {meeting.reportSettings.additionalPrompt && (
+                <div>
+                  <span className="text-sm font-medium text-blue-800">Custom Instructions:</span>
+                  <p className="text-blue-700 text-sm italic">"{meeting.reportSettings.additionalPrompt}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-amber-50 border-amber-200 border">
         <CardContent className="p-4">
           <h4 className="font-medium text-amber-900 mb-2">Report Generation Features:</h4>
@@ -344,6 +360,121 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
 }
 
 function generateMockReport(meeting: Meeting): string {
+  const totalTasks = meeting.projects.reduce((acc, project) => acc + project.tasks.length, 0);
+  const completedTasks = meeting.projects.reduce((acc, project) => 
+    acc + project.tasks.filter(task => task.status === 'finish').length, 0
+  );
+  const inProgressTasks = meeting.projects.reduce((acc, project) => 
+    acc + project.tasks.filter(task => task.status === 'in-progress').length, 0
+  );
+  const blockedTasks = meeting.projects.reduce((acc, project) => 
+    acc + project.tasks.filter(task => task.status === 'blocked').length, 0
+  );
+
+  let report = '';
+
+  switch (meeting.reportSettings.style) {
+    case 'executive':
+      report += `# Executive Summary: ${meeting.title}\n\n`;
+      report += `**Date:** ${new Date(meeting.date).toLocaleDateString()} at ${meeting.time}\n`;
+      report += `**Overall Progress:** ${Math.round((completedTasks / Math.max(totalTasks, 1)) * 100)}% Complete\n\n`;
+      break;
+    
+    case 'client-friendly':
+      report += `# Meeting Report: ${meeting.title}\n\n`;
+      report += `Thank you for taking the time to meet with us on ${new Date(meeting.date).toLocaleDateString()}.\n\n`;
+      report += `## Summary\n${meeting.description}\n\n`;
+      break;
+    
+    case 'technical':
+      report += `# Technical Report: ${meeting.title}\n\n`;
+      report += `**Meeting Metadata:**\n`;
+      report += `- Date/Time: ${new Date(meeting.date).toLocaleDateString()} ${meeting.time}\n`;
+      report += `- Projects: ${meeting.projects.length}\n`;
+      report += `- Total Tasks: ${totalTasks}\n\n`;
+      break;
+    
+    default:
+      report += `# Detailed Meeting Report: ${meeting.title}\n\n`;
+      report += `**Meeting Overview:**\n`;
+      report += `- Date: ${new Date(meeting.date).toLocaleDateString()}\n`;
+      report += `- Time: ${meeting.time}\n`;
+      report += `- Description: ${meeting.description}\n\n`;
+  }
+
+  report += `## Project Status\n\n`;
+  
+  meeting.projects.forEach((project) => {
+    const projectCompleted = project.tasks.filter(task => task.status === 'finish').length;
+    const projectTotal = project.tasks.length;
+    const projectProgress = projectTotal > 0 ? Math.round((projectCompleted / projectTotal) * 100) : 0;
+
+    report += `### ${project.name}\n`;
+    report += `${project.description}\n\n`;
+    report += `**Progress:** ${projectCompleted}/${projectTotal} tasks completed (${projectProgress}%)\n\n`;
+
+    const tasksByStatus = {
+      'finish': project.tasks.filter(t => t.status === 'finish'),
+      'in-progress': project.tasks.filter(t => t.status === 'in-progress'),
+      'blocked': project.tasks.filter(t => t.status === 'blocked')
+    };
+
+    Object.entries(tasksByStatus).forEach(([status, tasks]) => {
+      if (tasks.length > 0) {
+        const statusLabel = status === 'finish' ? 'Completed' : status === 'in-progress' ? 'In Progress' : 'Blocked';
+        report += `**${statusLabel} Tasks:**\n`;
+        tasks.forEach(task => {
+          report += `- ${task.title}: ${task.description}\n`;
+        });
+        report += `\n`;
+      }
+    });
+  });
+
+  if (meeting.notes) {
+    report += `## Meeting Notes\n\n`;
+    report += `${meeting.notes}\n\n`;
+  }
+
+  report += `## Summary & Next Steps\n\n`;
+  
+  if (meeting.reportSettings.style === 'executive') {
+    report += `**Key Outcomes:**\n`;
+    report += `- ${completedTasks} tasks completed across ${meeting.projects.length} projects\n`;
+    if (blockedTasks > 0) {
+      report += `- ${blockedTasks} tasks currently blocked - requiring immediate attention\n`;
+    }
+    if (inProgressTasks > 0) {
+      report += `- ${inProgressTasks} tasks in active development\n`;
+    }
+  } else if (meeting.reportSettings.style === 'client-friendly') {
+    report += `We made excellent progress during this meeting:\n\n`;
+    report += `- Successfully completed ${completedTasks} tasks\n`;
+    report += `- Currently working on ${inProgressTasks} ongoing initiatives\n`;
+    if (blockedTasks > 0) {
+      report += `- Identified ${blockedTasks} items that need your input to proceed\n`;
+    }
+  } else {
+    report += `**Meeting Statistics:**\n`;
+    report += `- Total Tasks: ${totalTasks}\n`;
+    report += `- Completed: ${completedTasks}\n`;
+    report += `- In Progress: ${inProgressTasks}\n`;
+    report += `- Blocked: ${blockedTasks}\n`;
+    report += `- Completion Rate: ${Math.round((completedTasks / Math.max(totalTasks, 1)) * 100)}%\n\n`;
+  }
+
+  //if (meeting.reportSettings.additionalPrompt) {
+  //  report += `\n**Additional Considerations:**\n`;
+  //  report += `${meeting.reportSettings.additionalPrompt}\n`;
+  //}
+
+  //report += `\n---\n`;
+  //report += `*This report was generated automatically based on meeting data and notes.*`;
+
+  return report;
+}
+
+function generateMockReportMD(meeting: Meeting): string {
   const totalTasks = meeting.projects.reduce((acc, project) => acc + project.tasks.length, 0);
   const completedTasks = meeting.projects.reduce((acc, project) => 
     acc + project.tasks.filter(task => task.status === 'finish').length, 0

@@ -17,7 +17,8 @@ import { useGlobal } from '@/lib/context/GlobalContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/webapp/ui/avatar';
 import PricingService from "@/lib/billing/front/pricing";
 
-export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">Meeting Reports</h1>) }) {
+const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
+export default function TopNavBar({ title = (<h1 className="text-xl font-bold text-gray-900">{productName}</h1>) }) {
   const router = useRouter();
   const { user } = useGlobal();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
