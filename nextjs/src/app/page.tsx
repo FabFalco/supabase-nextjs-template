@@ -1,14 +1,33 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Globe, Shield, Users, Key, Database, Clock } from 'lucide-react';
+import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Calendar, TreeDeciduous, FolderKanban, ListTodo } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 import HomePricing from "@/components/HomePricing";
+import { Treemap } from 'recharts';
 
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
 
   const features = [
     {
+      icon: ListTodo,
+      title: 'Organize your tasks',
+      description: 'Drag and drop. Easy to use.',
+      color: 'text-green-600'
+    },
+    {
+      icon: FolderKanban,
+      title: 'See clearly instantly',
+      description: 'A summary view that improves your productivity.',//A summary view that structures your progress.
+      color: 'text-blue-600'
+    },
+    {
+      icon: Clock,
+      title: 'Generate your automatic summary',
+      description: 'Summary, actions, blocks: all in one click.',
+      color: 'text-red-600'
+    },
+    /*{
       icon: Shield,
       title: 'Robust Authentication',
       description: 'Secure login with email/password, Multi-Factor Authentication, and SSO providers',
@@ -43,7 +62,28 @@ export default function Home() {
       title: 'Cookie Consent',
       description: 'GDPR-compliant cookie consent system with customizable preferences',
       color: 'text-blue-600'
-    }
+    }*/
+  ];
+
+  const badfeatures = [
+    {
+      icon: Users,
+      title: 'Meetings without follow-up',
+      //description: 'Drag and drop, statuses, simple columns.',
+      color: 'text-green-600'
+    },
+    {
+      icon: Key,
+      title: 'Tasks scattered',
+      //description: 'A summary view that structures your progress.',
+      color: 'text-blue-600'
+    },
+    {
+      icon: Clock,
+      title: 'Reports to be completedy',
+      //description: 'Summary, actions, blocks: all in one click.',
+      color: 'text-teal-600'
+    },
   ];
 
   const stats = [
@@ -71,8 +111,8 @@ export default function Home() {
                 <Link href="#pricing" className="text-gray-600 hover:text-gray-900">
                   Pricing
                 </Link>
-                <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
+                {/*<Link
+                    href="https://github.com/FabFalco/supabase-nextjs-template"
                     className="text-gray-600 hover:text-gray-900"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -81,13 +121,13 @@ export default function Home() {
                 </Link>
 
                 <Link
-                    href="https://github.com/Razikus/supabase-nextjs-template"
+                    href="https://github.com/FabFalco/supabase-nextjs-template"
                     className="bg-primary-800 text-white px-4 py-2 rounded-lg hover:bg-primary-900 transition-colors"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                   Grab This Template
-                </Link>
+                </Link>*/}
 
                 <AuthAwareButtons variant="nav" />
               </div>
@@ -99,11 +139,11 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-                Bootstrap Your SaaS
-                <span className="block text-primary-600">In 5 minutes</span>
+                Kanban that writes your reports for you.
+                <span className="block text-primary-600">No pain. No report to write.</span>
               </h1>
               <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
-                Launch your SaaS product in days, not months. Complete with authentication and enterprise-grade security built right in.
+                Easily manage your tasks, projects and meetings. Generate summaries in one click.
               </p>
               <div className="mt-10 flex gap-4 justify-center">
 
@@ -113,7 +153,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+        {/*<section className="py-16 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
@@ -124,15 +164,15 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </section>*/}
 
         {/* Features Section */}
         <section id="features" className="py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold">Everything You Need</h2>
+              <h2 className="text-3xl font-bold">The simplest way to reports</h2>
               <p className="mt-4 text-xl text-gray-600">
-                Built with modern technologies for reliability and speed
+                Just don't do it.
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -152,16 +192,41 @@ export default function Home() {
 
         <HomePricing />
 
+{/* Bad Features Section 
+        <section id="badfeatures" className="py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold">You spend too much time organizing... and even more time summarizing.</h2>
+              <p className="mt-4 text-xl text-gray-600">
+                No one really knows "where we stand".
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {badfeatures.map((feature, index) => (
+                  <div
+                      key={index}
+                      className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <feature.icon className={`h-8 w-8 ${feature.color}`} />
+                    <h3 className="mt-4 text-xl font-semibold">{feature.title}</h3>
+                    <p className="mt-2 text-gray-600">{feature.description}</p>
+                  </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        */}
+
         <section className="py-24 bg-primary-600">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold text-white">
-              Ready to Transform Your Idea into Reality?
+              Ready to Transform Your project management ?
             </h2>
             <p className="mt-4 text-xl text-primary-100">
-              Join thousands of developers building their SaaS with {productName}
+              Join the users who save time with {productName}
             </p>
             <Link
-                href="/auth/register"
+                href="/webapp"
                 className="mt-8 inline-flex items-center px-6 py-3 rounded-lg bg-white text-primary-600 font-medium hover:bg-primary-50 transition-colors"
             >
               Get Started Now
@@ -192,7 +257,7 @@ export default function Home() {
                 <h4 className="text-sm font-semibold text-gray-900">Resources</h4>
                 <ul className="mt-4 space-y-2">
                   <li>
-                    <Link href="https://github.com/Razikus/supabase-nextjs-template" className="text-gray-600 hover:text-gray-900">
+                    <Link href="https://github.com/FabFalco/supabase-nextjs-template" className="text-gray-600 hover:text-gray-900">
                       Documentation
                     </Link>
                   </li>

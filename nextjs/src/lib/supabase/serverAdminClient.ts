@@ -1,9 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
-import {Database} from "@/lib/types";
 
 export async function createServerAdminClient() {
 
-    return createServerClient<Database>(
+    return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.PRIVATE_SUPABASE_SERVICE_KEY!,
         {

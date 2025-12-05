@@ -5,12 +5,17 @@ import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/webapp/ui/tabs';
-import { ArrowLeft, FolderOpen, Settings, FileText, Sparkles } from 'lucide-react';
+import { ArrowLeft, FolderOpen, Settings, FileText, Sparkles, Plus } from 'lucide-react';
 import { Meeting } from '@/types';
 import ProjectView from './ProjectView';
 import NotesView from './NotesView';
 import ReportSettings from './ReportSettings';
 import ReportGeneration from './ReportGeneration';
+import CreateProjectDialog from './CreateProjectDialog';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import { mapSupabaseToMeetings } from '@/lib/mapper';
+import { mapSupabaseToProject } from '@/lib/mapper';
+import TopNavBar from '@/components/webapp/TopNavBar';
 
 interface MeetingViewProps {
   meeting: Meeting;
@@ -21,6 +26,8 @@ interface MeetingViewProps {
 export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewProps) {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('projects');
+  const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleNotesUpdate = (notes: string) => {
     onUpdate({ ...meeting, notes });
@@ -53,26 +60,54 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
   }
 
   const getTotalTasks = () => meeting.projects.reduce((acc, project) => acc + project.tasks.length, 0);
-  const getCompletedTasks = () => meeting.projects.reduce((acc, project) => 
+  const getCompletedTasks = () => meeting.projects.reduce((acc, project) =>
     acc + project.tasks.filter(task => task.status === 'finish').length, 0
   );
 
+  const refreshMeetingData = async () => {
+    setIsRefreshing(true);
+    try {
+      const supabase = await createSPASassClient();
+      const client = supabase.getSupabaseClient();
+      const { data: user } = await client.auth.getUser();
+
+      if (user.user) {
+        const { data, error } = await supabase.getUserMeetingsFull(user.user.id);
+
+        if (!error && data && data.length > 0) {
+          const updatedMeetings = mapSupabaseToMeetings(data);
+          const updatedMeeting = updatedMeetings.find(m => m.id === meeting.id);
+          if (updatedMeeting) {
+            onUpdate(updatedMeeting);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error refreshing meeting data:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const buttonBack = (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+      <Button
+        variant="ghost"
+        onClick={onBack}
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Meetings
+      </Button>
+    </div>
+  );
+
   return (
+    <>
+    <TopNavBar title = {buttonBack} />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              onClick={onBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Meetings
-            </Button>
-          </div>
-          
+        <div className="mb-6">          
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
               <div className="flex-1">
@@ -123,6 +158,16 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
           </TabsList>
 
           <TabsContent value="projects" className="space-y-6">
+            <div className="flex justify-end mb-4">
+              <Button
+                onClick={() => setShowCreateProjectDialog(true)}
+                className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                New Project
+              </Button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {meeting.projects.map((project) => {
                 const completedTasks = project.tasks.filter(task => task.status === 'finish').length;
@@ -187,12 +232,14 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
           <TabsContent value="notes">
             <NotesView
               notes={meeting.notes}
+              meetingId={meeting.id}
               onUpdate={handleNotesUpdate}
             />
           </TabsContent>
 
           <TabsContent value="settings">
             <ReportSettings
+              meetingId={meeting.id}
               settings={meeting.reportSettings}
               onUpdate={handleReportSettingsUpdate}
             />
@@ -204,7 +251,16 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
             />
           </TabsContent>
         </Tabs>
+
+        {/* Create Project Dialog */}
+        <CreateProjectDialog
+          open={showCreateProjectDialog}
+          onOpenChange={setShowCreateProjectDialog}
+          meetingId={meeting.id}
+          onProjectCreated={refreshMeetingData}
+        />
       </div>
     </div>
+    </>
   );
 }

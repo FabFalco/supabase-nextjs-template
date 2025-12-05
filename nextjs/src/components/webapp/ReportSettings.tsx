@@ -8,9 +8,11 @@ import { Badge } from '@/components/webapp/ui/badge';
 import { Settings, FileText, Users, Code, Save } from 'lucide-react';
 import { ReportSettings as ReportSettingsType } from '@/types';
 import { useState } from 'react';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 
 interface ReportSettingsProps {
   settings: ReportSettingsType;
+  meetingId: string;
   onUpdate: (settings: ReportSettingsType) => void;
 }
 
@@ -49,9 +51,10 @@ const reportStyles = [
   }
 ];
 
-export default function ReportSettings({ settings, onUpdate }: ReportSettingsProps) {
+export default function ReportSettings({ settings, meetingId, onUpdate }: ReportSettingsProps) {
   const [localSettings, setLocalSettings] = useState(settings);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleStyleChange = (style: ReportSettingsType['style']) => {
     const newSettings = { ...localSettings, style };
@@ -65,31 +68,58 @@ export default function ReportSettings({ settings, onUpdate }: ReportSettingsPro
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    onUpdate(localSettings);
-    setHasChanges(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const supabase = await createSPASassClient();
+      const { error } = await supabase.updateReportSettings(
+        meetingId,
+        localSettings.style,
+        localSettings.additionalPrompt
+      );
+
+      if (error) throw error;
+
+      onUpdate(localSettings);
+      setHasChanges(false);
+    } catch (err) {
+      console.error('Error saving report settings:', err);
+      alert('Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Settings Header */}
       <Card className="bg-white border-0 shadow-md">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Settings className="w-5 h-5 text-purple-600" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Settings className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-gray-900">Report Settings</CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  Configure how AI generates reports from your meeting data
+                </p>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-xl text-gray-900">Report Settings</CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                Configure how AI generates reports from your meeting data
-              </p>
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanges || isSaving}
+                className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {isSaving ? 'Saving...' : hasChanges ? 'Save Settings' : 'Settings Saved'}
+              </Button>
             </div>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Report Style Selection */}
       <Card className="bg-white border-0 shadow-md">
         <CardHeader>
           <CardTitle className="text-lg text-gray-900">Report Style</CardTitle>
@@ -132,7 +162,6 @@ export default function ReportSettings({ settings, onUpdate }: ReportSettingsPro
         </CardContent>
       </Card>
 
-      {/* Additional Prompt */}
       <Card className="bg-white border-0 shadow-md">
         <CardHeader>
           <CardTitle className="text-lg text-gray-900">Additional Instructions</CardTitle>
@@ -149,7 +178,7 @@ export default function ReportSettings({ settings, onUpdate }: ReportSettingsPro
               id="additional-prompt"
               value={localSettings.additionalPrompt}
               onChange={(e) => handlePromptChange(e.target.value)}
-              placeholder="e.g., Focus on action items and deadlines, include team responsibilities, emphasize budget considerations..."
+              placeholder="e.g., In FRENCH, focus on action items and deadlines, include team responsibilities, emphasize budget considerations..."
               className="mt-2 h-32"
             />
             <p className="text-xs text-gray-500 mt-2">
@@ -159,7 +188,6 @@ export default function ReportSettings({ settings, onUpdate }: ReportSettingsPro
         </CardContent>
       </Card>
 
-      {/* Preview Section */}
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <CardTitle className="text-lg text-blue-900">Report Preview</CardTitle>
@@ -196,17 +224,16 @@ export default function ReportSettings({ settings, onUpdate }: ReportSettingsPro
         </CardContent>
       </Card>
 
-      {/* Save Button */}
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <Button
           onClick={handleSave}
-          disabled={!hasChanges}
+          disabled={!hasChanges || isSaving}
           className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
         >
           <Save className="w-4 h-4" />
-          {hasChanges ? 'Save Settings' : 'Settings Saved'}
+          {isSaving ? 'Saving...' : hasChanges ? 'Save Settings' : 'Settings Saved'}
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

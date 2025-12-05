@@ -7,10 +7,12 @@ import {
 import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
-import { Plus, Calendar, Users, CheckSquare, FileText, Settings, Loader2 } from 'lucide-react';
+import { Plus, Calendar, Users, SquareCheck as CheckSquare, FileText, Settings, Loader as Loader2 } from 'lucide-react';
 import MeetingView from '@/components/webapp/MeetingView';
+import CreateMeetingDialog from '@/components/webapp/CreateMeetingDialog';
 import { Meeting } from '@/types';
-import { Database } from '@/lib/types';
+import TopNavBar from '@/components/webapp/TopNavBar';
+import { Database } from '@/types/database';
 import { mapSupabaseToMeetings } from '@/lib/mapper'
 
 type Meetings = Database['public']['Tables']['meetings']['Row'];
@@ -112,6 +114,7 @@ export default function Home() {
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
 
   useEffect(() => {
       if (user?.id) {
@@ -174,6 +177,8 @@ export default function Home() {
   }
 
   return (
+    <>
+    <TopNavBar />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -183,7 +188,10 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Meeting Reports</h1>
               <p className="text-gray-600 text-lg">Manage your meetings, projects, and generate AI-powered reports</p>
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 px-6 py-3 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+            >
               <Plus className="w-5 h-5" />
               New Meeting
             </Button>
@@ -350,13 +358,25 @@ export default function Home() {
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No meetings yet</h3>
             <p className="text-gray-600 mb-4">Create your first meeting to get started with project management and reporting.</p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Meeting
             </Button>
           </div>
         )}
+
+        {/* Create Meeting Dialog */}
+        <CreateMeetingDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onMeetingCreated={loadTasks}
+          userId={user?.id || ''}
+        />
       </div>
     </div>
+  </>
   );
 }

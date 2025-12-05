@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui
 import { Badge } from '@/components/webapp/ui/badge';
 import { ArrowLeft, Plus, GripVertical } from 'lucide-react';
 import { Project, Task } from '@/types';
+import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import TopNavBar from '@/components/webapp/TopNavBar';
+import { mapSupabaseToTask, mapTaskToSupabase } from '@/lib/mapper';
 
 interface ProjectViewProps {
   project: Project;
@@ -48,19 +51,26 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, newStatus: Task['status']) => {
+  const handleDrop = async (e: React.DragEvent, newStatus: Task['status']) => {
     e.preventDefault();
-    
+
     if (draggedTask && draggedFrom !== newStatus) {
       const updatedTasks = project.tasks.map(task =>
         task.id === draggedTask.id
           ? { ...task, status: newStatus }
           : task
       );
-      
+
       onUpdate({ ...project, tasks: updatedTasks });
+
+      try {
+        const supabase = await createSPASassClient();
+        await supabase.updateTask(draggedTask.id, { status: newStatus });
+      } catch (err) {
+        console.error('Error updating task status:', err);
+      }
     }
-    
+
     setDraggedTask(null);
     setDraggedFrom(null);
   };
@@ -69,42 +79,69 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
     return project.tasks.filter(task => task.status === status);
   };
 
-  const addNewTask = (status: Task['status']) => {
-    const newTask: Task = {
-      id: `t${Date.now()}`,
-      title: 'New Task',
-      status,
-      description: 'Click to edit description'
-    };
-    
-    onUpdate({
-      ...project,
-      tasks: [...project.tasks, newTask]
-    });
+  const addNewTask = async (status: Task['status']) => {
+    try {
+      const supabase = await createSPASassClient();
+      const { data, error } = await supabase.createTask({
+        title: 'New Task',
+        description: 'Click to edit description',
+        status,
+        project_id: project.id,
+        order_index: project.tasks.length
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        const newTask = mapSupabaseToTask(data);
+
+        onUpdate({
+          ...project,
+          tasks: [...project.tasks, newTask]
+        });
+      }
+    } catch (err) {
+      console.error('Error creating task:', err);
+      alert('Failed to create task');
+    }
   };
 
-  const updateTask = (taskId: string, updates: Partial<Task>) => {
+  const updateTask = async (taskId: string, updates: Partial<Task>) => {
     const updatedTasks = project.tasks.map(task =>
       task.id === taskId ? { ...task, ...updates } : task
     );
-    
+
     onUpdate({ ...project, tasks: updatedTasks });
+
+    try {
+      const supabase = await createSPASassClient();
+      //const dbUpdates = mapTaskToSupabase(updates);
+      await supabase.updateTask(taskId, updates);
+    } catch (err) {
+      console.error('Error updating task:', err);
+    }
   };
 
+  const buttonBack = (
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <Button
+          variant="ghost"
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 w-fit"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to meeting {meetingTitle}
+        </Button>
+      </div>
+    );
+
   return (
+    <>
+    <TopNavBar title = {buttonBack} />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to {meetingTitle}
-          </Button>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.name}</h1>
             <p className="text-gray-600 mb-4">{project.description}</p>
@@ -203,5 +240,6 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
         </div>
       </div>
     </div>
+    </>
   );
 }

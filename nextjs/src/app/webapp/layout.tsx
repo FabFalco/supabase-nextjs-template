@@ -14,9 +14,7 @@ export default function WebAppLayout({
 }) {
   return (
     <GlobalProvider>
-        <main className="p-4">
             {children}
-        </main>
     </GlobalProvider>
   );
 }

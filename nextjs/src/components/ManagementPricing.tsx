@@ -1,50 +1,67 @@
 "use client";
-import React from 'react';
-import { Check } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Check, Loader as Loader2 } from 'lucide-react';
 import PricingService from "@/lib/billing/front/pricing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
+import { useGlobal } from '@/lib/context/GlobalContext';
 
-const HomePricing = () => {
+
+const ManagementPricing = () => {
     const tiers = PricingService.getAllTiers();
     const commonFeatures = PricingService.getCommonFeatures();
     const isActivated = PricingService.isActivated();
+    
+    const { user } = useGlobal(); // peut être undefined au début
+    const [planKey, setPlanKey] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const handleGetStarted = async (plan: string, price: number) => {
-        if(price === 0) return;
+    // Dès que user change, on met à jour planKey
+    useEffect(() => {
+        setLoading(true);
+        // sécurité : user peut être null/undefi
+        // ned ou avoir plan undefined
+        const p = user?.plan ?? null;
+        setPlanKey(p);
+        setLoading(false);
+    }, [user]);
+
+    const handleManagePlan = async (tierName: string, price: number) => {
+        //if(price === 0) return;
 
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
         try {
-            const {
-                data: { session },
-            } = await client.auth.getSession();
+        const {
+            data: { session },
+        } = await client.auth.getSession();
 
-            if (session) {
-                // 🔹 Utilisateur connecté → démarrer le checkout Stripe
-                const res = await fetch("/api/checkout", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json"},
-                    body: JSON.stringify({ plan }),
-                });
+        console.log(tierName);
+        if (session) {
+            // 🔹 Utilisateur connecté → démarrer le checkout Stripe
+            const res = await fetch("/api/checkout/manage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({tierName}),
+            });
 
-                if (!res.ok) throw new Error("Checkout failed");
-                const data = await res.json();
+            if (!res.ok) throw new Error("Checkout failed");
+            const data = await res.json();
 
-                if (data.url) {
-                    console.log(data.url)
-                    window.location.href = data.url; // 🔁 redirection Stripe Checkout
-                } else {
-                    alert(data.error || "Unable to start checkout");
-                }
+            if (data.url) {
+            console.log(data.url)
+            window.location.href = data.url; // 🔁 redirection Stripe Checkout
             } else {
-                // 🔹 Pas connecté → rediriger vers /auth/register avec callback
-                const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe`;
-                window.location.href = redirectUrl;
+            alert(data.error || "Unable to start checkout");
             }
+        } else {
+            // 🔹 Pas connecté → rediriger vers /auth/register avec callback
+            const redirectUrl = `/auth/register?redirect=/webapp/setting/stripe/management`;
+            window.location.href = redirectUrl;
+        }
         } catch (err) {
-            console.error("Error starting checkout:", err);
-            alert("Something went wrong. Please try again.");
+        console.error("Error starting checkout:", err);
+        alert("Something went wrong. Please try again.");
         }
     };
 
@@ -57,19 +74,24 @@ const HomePricing = () => {
                     <p className="text-gray-600 text-lg">Choose the plan that&#39;s right for your business</p>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8 mb-12">
+                {loading ? 
+                <div className="flex justify-center items-center min-h-[200px]">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+                </div>
+                : (<div className="grid md:grid-cols-3 gap-8 mb-12">
                     {tiers.map((tier) => (
                         <Card
                             key={tier.name}
                             className={`relative flex flex-col ${
-                                tier.popular ? 'border-primary-500 shadow-lg' : ''
+                                tier.key == planKey ? 'border-primary-500 shadow-lg' : ''
                             }`}
                         >
-                            {tier.popular && (
+                            {tier.key == planKey ? (
                                 <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-primary-500 text-white text-sm rounded-full">
-                                    Most Popular
+                                    Your plan
                                 </div>
-                            )}  
+                            ) : ''
+                            }  
 
                             <CardHeader>
                                 <CardTitle>{tier.name}</CardTitle>
@@ -92,19 +114,21 @@ const HomePricing = () => {
                                 </ul>
 
                                 <button
-                                    onClick={() => handleGetStarted(tier.key, tier.price)}
+                                    onClick={() => handleManagePlan(tier.name, tier.price)}
                                     className={`w-full text-center px-6 py-3 rounded-lg font-medium transition-colors ${
-                                        tier.popular
+                                        tier.key == planKey
                                         ? "bg-primary-600 text-white hover:bg-primary-700"
                                         : "bg-gray-50 text-gray-900 hover:bg-gray-100"
                                     }`}
                                     >
-                                    Get Started
+                                    {tier.key == planKey
+                                        ? "Manage your plan" : "Change your plan"
+                                    }
                                 </button>
                             </CardContent>
                         </Card>
                     ))}
-                </div>
+                </div>)}
 
                 <div className="text-center">
                     <p className="text-gray-600">
@@ -117,4 +141,4 @@ const HomePricing = () => {
     );
 };
 
-export default HomePricing;
+export default ManagementPricing;
