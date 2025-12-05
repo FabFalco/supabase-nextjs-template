@@ -8,6 +8,7 @@ import { createSPASassClient } from '@/lib/supabase/client';
 const HomePricing = () => {
     const tiers = PricingService.getAllTiers();
     const commonFeatures = PricingService.getCommonFeatures();
+    const isActivated = PricingService.isActivated();
 
     const handleGetStarted = async (plan: string, price: number) => {
         if(price === 0) return;
@@ -48,6 +49,7 @@ const HomePricing = () => {
     };
 
     return (
+        isActivated ?
         <section id="pricing" className="py-24 bg-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
@@ -111,6 +113,7 @@ const HomePricing = () => {
                 </div>
             </div>
         </section>
+        : '' 
     );
 };
 

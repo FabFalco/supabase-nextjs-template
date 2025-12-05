@@ -10,6 +10,7 @@ import { useGlobal } from '@/lib/context/GlobalContext';
 const ManagementPricing = () => {
     const tiers = PricingService.getAllTiers();
     const commonFeatures = PricingService.getCommonFeatures();
+    const isActivated = PricingService.isActivated();
     
     const { user } = useGlobal(); // peut être undefined au début
     const [planKey, setPlanKey] = useState<string | null>(null);
@@ -65,6 +66,7 @@ const ManagementPricing = () => {
     };
 
     return (
+        isActivated ?
         <section id="pricing" className="py-24 bg-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
@@ -135,6 +137,7 @@ const ManagementPricing = () => {
                 </div>
             </div>
         </section>
+        : '' 
     );
 };
 

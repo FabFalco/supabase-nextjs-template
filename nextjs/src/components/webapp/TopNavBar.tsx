@@ -95,7 +95,7 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
                       Change Password
                     </DropdownMenuItem>
 
-                    { stripeMenu }
+                    { PricingService.isActivated() && stripeMenu }
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem

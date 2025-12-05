@@ -12,8 +12,10 @@ export interface PricingTier {
 class PricingService {
     private static tiers: PricingTier[] = [];
     private static planKey: string[] = [];
+    private static activated: boolean;
 
     static initialize() {
+        const activate = process.env.NEXT_PUBLIC_TIERS_ACTIVATE === 'true';
         const keys = process.env.NEXT_PUBLIC_TIERS_KEYS?.split(',') || [];
         const names = process.env.NEXT_PUBLIC_TIERS_NAMES?.split(',') || [];
         const prices = process.env.NEXT_PUBLIC_TIERS_PRICES?.split(',').map(Number) || [];
@@ -33,6 +35,11 @@ class PricingService {
             planLevel: index,
         }));
         this.planKey = keys;
+        this.activated = activate;
+    }
+
+    static isActivated(): boolean {
+        return this.activated;
     }
 
     static getAllTiers(): PricingTier[] {
