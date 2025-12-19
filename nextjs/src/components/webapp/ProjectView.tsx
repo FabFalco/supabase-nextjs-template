@@ -9,6 +9,7 @@ import { Project, Task } from '@/types';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import TopNavBar from '@/components/webapp/TopNavBar';
 import { mapSupabaseToTask, mapTaskToSupabase } from '@/lib/mapper';
+import { useHistoryBack } from '@/hooks/useHistoryBack';
 
 interface ProjectViewProps {
   project: Project;
@@ -41,6 +42,8 @@ const statusConfig = {
 export default function ProjectView({ project, meetingTitle, onBack, onUpdate }: ProjectViewProps) {
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [draggedFrom, setDraggedFrom] = useState<string | null>(null);
+
+  useHistoryBack(onBack, 'project');
 
   const handleDragStart = (task: Task) => {
     setDraggedTask(task);

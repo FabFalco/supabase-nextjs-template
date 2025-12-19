@@ -13,7 +13,8 @@ import CreateMeetingDialog from '@/components/webapp/CreateMeetingDialog';
 import { Meeting } from '@/types';
 import TopNavBar from '@/components/webapp/TopNavBar';
 import { Database } from '@/types/database';
-import { mapSupabaseToMeetings } from '@/lib/mapper'
+import { mapSupabaseToMeetings } from '@/lib/mapper';
+import { useHistoryBack } from '@/hooks/useHistoryBack'
 
 type Meetings = Database['public']['Tables']['meetings']['Row'];
 type Projects = Database['public']['Tables']['projects']['Row'];
@@ -104,7 +105,7 @@ type Tasks = Database['public']['Tables']['tasks']['Row'];
 
 export default function Home() {
   const { user } = useGlobal();
-  
+
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   //const [meetings, setMeetings] = useState<Meeting[]>(mockMeetings);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -115,6 +116,8 @@ export default function Home() {
   const [filter, setFilter] = useState<boolean | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
+
+  useHistoryBack(() => setSelectedMeeting(null), selectedMeeting ? 'meeting' : 'meetings');
 
   useEffect(() => {
       if (user?.id) {
