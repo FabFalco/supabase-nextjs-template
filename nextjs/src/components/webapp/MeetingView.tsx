@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useHistoryBack } from '@/hooks/useHistoryBack';
 import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
@@ -28,6 +29,8 @@ export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewPr
   const [activeTab, setActiveTab] = useState('projects');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useHistoryBack(() => setSelectedProject(null), selectedProject ? 'project' : 'meeting');
 
   const handleNotesUpdate = (notes: string) => {
     onUpdate({ ...meeting, notes });
