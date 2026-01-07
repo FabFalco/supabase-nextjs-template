@@ -117,7 +117,7 @@ export default function Home() {
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
 
-  useHistoryBack(() => setSelectedMeeting(null), selectedMeeting ? 'meeting' : 'meetings');
+  //useHistoryBack(() => {}, 'meetings');
 
   useEffect(() => {
       if (user?.id) {
@@ -166,6 +166,7 @@ export default function Home() {
       <MeetingView 
         meeting={selectedMeeting} 
         onBack={() => setSelectedMeeting(null)}
+        onProjectBack={() => setSelectedMeeting(selectedMeeting)}
         onUpdate={handleMeetingUpdate}
       />
     );

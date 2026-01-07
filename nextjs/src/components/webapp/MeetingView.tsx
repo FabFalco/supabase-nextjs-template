@@ -21,16 +21,17 @@ import TopNavBar from '@/components/webapp/TopNavBar';
 interface MeetingViewProps {
   meeting: Meeting;
   onBack: () => void;
+  onProjectBack: () => void;
   onUpdate: (meeting: Meeting) => void;
 }
 
-export default function MeetingView({ meeting, onBack, onUpdate }: MeetingViewProps) {
+export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate }: MeetingViewProps) {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('projects');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useHistoryBack(() => setSelectedProject(null), selectedProject ? 'project' : 'meeting');
+  useHistoryBack(selectedProject ? onProjectBack : onBack, selectedProject ? 'project' : 'meeting');
 
   const handleNotesUpdate = (notes: string) => {
     onUpdate({ ...meeting, notes });

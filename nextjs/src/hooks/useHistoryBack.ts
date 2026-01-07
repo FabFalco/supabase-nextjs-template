@@ -14,9 +14,9 @@ export function useHistoryBack(onBack: () => void, page: HistoryState['page']) {
     const handlePopState = (event: PopStateEvent) => {
       const state = event.state as HistoryState | null;
 
-      if (state?.page === 'meetings') {
+      //if (state?.page === 'meetings') {
         onBack();
-      }
+      //}
     };
 
     window.addEventListener('popstate', handlePopState);
