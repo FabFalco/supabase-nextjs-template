@@ -18,24 +18,101 @@ const reportStyles = [
   {
     id: 'executive' as const,
     name: 'Executive Summary',
-    prompt: 'High-level overview focused on key decisions and outcomes'
+    prompt: `You are an assistant helping to write an **executive-level status report**.
+
+Based on the tasks provided below, produce a **concise executive summary** that:
+- Highlights overall progress
+- Summarizes completed work
+- Identifies remaining work
+- Calls out key risks, blockers, or decisions needed
+
+Guidelines:
+- Keep it short and strategic
+- Use clear sections and bullet points
+- Focus on outcomes, not operational details
+- Avoid technical jargon unless strictly necessary
+
+Structure:
+1. Overall Status
+2. Completed Work
+3. Upcoming Work
+4. Risks / Blockers / Decisions`
   },
   {
     id: 'detailed' as const,
     name: 'Detailed Report',
-    prompt: 'Comprehensive report with full discussion details'
+    prompt: `You are an assistant helping to write a **detailed project status report**.
+
+Based on the tasks listed below, generate a **comprehensive report** that:
+- Describes what has been accomplished
+- Explains ongoing work
+- Details remaining tasks
+- Mentions dependencies, issues, and blockers
+
+Guidelines:
+- Provide full context
+- Be precise and explicit
+- Explain task status and progression
+- Use structured paragraphs and clear headings
+
+Structure:
+1. Project Overview
+2. Completed Tasks (with brief explanations)
+3. In-Progress Tasks
+4. Pending Tasks
+5. Issues, Risks, and Dependencies
+6. Next Steps`
   },
   {
     id: 'client-friendly' as const,
     name: 'Client-Friendly',
-    prompt: 'Non-technical language suitable for external stakeholders'
+    prompt: `You are an assistant writing a **client-friendly project update**.
+
+Based on the tasks provided below, produce a **clear and accessible report** that:
+- Explains progress in simple terms
+- Focuses on business value and outcomes
+- Reassures the client about project direction
+
+Guidelines:
+- Use non-technical language
+- Avoid internal or developer jargon
+- Be positive, transparent, and professional
+- Keep explanations simple and readable
+
+Structure:
+1. Project Progress Overview
+2. What Has Been Completed
+3. What Is Currently Being Worked On
+4. What Comes Next
+5. Important Notes or Risks (if any)`
   },
   {
     id: 'technical' as const,
     name: 'Technical Report',
-    prompt: 'In-depth technical details for development teams'
+    prompt: `You are an assistant generating a **technical project report** for a development team.
+
+Based on the tasks listed below, create a **technical status report** that:
+- Details completed and ongoing technical work
+- References implementation aspects where relevant
+- Identifies technical blockers or risks
+- Highlights next technical steps
+
+Guidelines:
+- Use accurate technical terminology
+- Be explicit about implementation status
+- Assume a technical audience
+- Structure information clearly
+
+Structure:
+1. Technical Overview
+2. Completed Implementations
+3. Work In Progress
+4. Pending Technical Tasks
+5. Blockers, Risks, and Dependencies
+6. Next Technical Actions`
   }
 ];
+
 
 export default function ReportPrompt({ meeting }: ReportPromptProps) {
   const [open, setOpen] = useState(false);
@@ -136,10 +213,8 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
   };
 
   const copyContextToClipboard = () => {
-    if (meeting.reportSettings.additionalPrompt) {
-      navigator.clipboard.writeText("Write a report in style " + meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ') + " on the progress of the tasks listed below, highlighting key points and any potential blockers. " + meeting.reportSettings.additionalPrompt);
-      alert('System Prompt copied to clipboard!');
-    }
+    navigator.clipboard.writeText(reportStyles.find(s => s.id === meeting.reportSettings.style)?.prompt + "\n\n" + meeting.reportSettings.additionalPrompt);
+    alert('System Prompt copied to clipboard!');
   };
 
   const downloadReport = () => {
@@ -294,8 +369,14 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
                 <Badge className="ml-2 bg-blue-100 text-blue-700">
                   {meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}
                 </Badge>
-                <p className="text-blue-700">Write a report in style '{meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}' on the progress of the tasks listed below, highlighting key points and any potential blockers.</p>
-                {/* en {meeting.reportSettings.style.language} */}
+                {/*<p className="text-blue-700">{reportStyles.find(s => s.id === meeting.reportSettings.style)?.prompt}</p>*/}
+                <div className="space-y-4">
+                <div className="rounded-lg p-6 max-h-96 overflow-y-auto">
+                  <pre className="text-blue-700">
+                    {reportStyles.find(s => s.id === meeting.reportSettings.style)?.prompt}
+                  </pre>
+                </div>
+              </div>
               </div>
               {meeting.reportSettings.additionalPrompt && (
                 <div>
@@ -397,11 +478,12 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
         <CardContent className="p-4">
           <h4 className="font-medium text-amber-900 mb-2">Report Generation Features:</h4>
           <ul className="text-sm text-amber-800 space-y-1">
-            <li>• AI analyzes your meeting data, projects, tasks, and notes</li>
-            <li>• Reports generated based on selected style and custom instructions</li>
+            <li>• Step 1 — Generate Report based on your meeting data, projects, tasks, and notes</li>
+            <li>• Step 2 — Paste AI Stater Prompt once at the beginning of your ChatGPT conversation</li>
+            <li>• Step 3 — Paste your Report Prompt after each update</li>
+            <li>• Save one report per meeting, automatically retrieved</li>
             <li>• Create email drafts to send reports directly</li>
             <li>• Download reports as Markdown files</li>
-            <li>• Save to Supabase storage (one report per meeting, automatically retrieved)</li>
             <li>• Regenerate reports anytime as meeting data changes</li>
           </ul>
         </CardContent>
