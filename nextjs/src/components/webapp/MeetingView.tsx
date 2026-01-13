@@ -11,7 +11,7 @@ import { Meeting } from '@/types';
 import ProjectView from './ProjectView';
 import NotesView from './NotesView';
 import ReportSettings from './ReportSettings';
-import ReportGeneration from './ReportGeneration';
+import ReportPrompt from './ReportPrompt';
 import CreateProjectDialog from './CreateProjectDialog';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { mapSupabaseToMeetings } from '@/lib/mapper';
@@ -250,7 +250,7 @@ export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate }
           </TabsContent>
 
           <TabsContent value="report">
-            <ReportGeneration
+            <ReportPrompt
               meeting={meeting}
             />
           </TabsContent>

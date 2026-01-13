@@ -4,18 +4,42 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Button } from '@/components/webapp/ui/button';
 import { Badge } from '@/components/webapp/ui/badge';
-import { Sparkles, Download, Copy, RefreshCw, FileText, Clock, Mail, Save } from 'lucide-react';
+import { Sparkles, Download, Copy, RefreshCw, FileText, Clock, Mail, Save, Waypoints, ChevronDown } from 'lucide-react';
 import { Meeting } from '@/types';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { mapSupabaseToGeneratedReport } from '@/lib/mapper';
 
-interface ReportGenerationProps {
+interface ReportPromptProps {
   meeting: Meeting;
 }
 
-// Sera utilisé pour faire générer le rapport via ChatGPT
-export default function ReportGeneration({ meeting }: ReportGenerationProps) {
+const reportStyles = [
+  {
+    id: 'executive' as const,
+    name: 'Executive Summary',
+    prompt: 'High-level overview focused on key decisions and outcomes'
+  },
+  {
+    id: 'detailed' as const,
+    name: 'Detailed Report',
+    prompt: 'Comprehensive report with full discussion details'
+  },
+  {
+    id: 'client-friendly' as const,
+    name: 'Client-Friendly',
+    prompt: 'Non-technical language suitable for external stakeholders'
+  },
+  {
+    id: 'technical' as const,
+    name: 'Technical Report',
+    prompt: 'In-depth technical details for development teams'
+  }
+];
+
+export default function ReportPrompt({ meeting }: ReportPromptProps) {
+  const [open, setOpen] = useState(false);
+
   const { user } = useGlobal();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedReport, setGeneratedReport] = useState<string | null>(null);
@@ -107,7 +131,14 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
   const copyToClipboard = () => {
     if (generatedReport) {
       navigator.clipboard.writeText(generatedReport);
-      alert('Report copied to clipboard!');
+      alert('Report Prompt copied to clipboard!');
+    }
+  };
+
+  const copyContextToClipboard = () => {
+    if (meeting.reportSettings.additionalPrompt) {
+      navigator.clipboard.writeText("Write a report in style " + meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ') + " on the progress of the tasks listed below, highlighting key points and any potential blockers. " + meeting.reportSettings.additionalPrompt);
+      alert('System Prompt copied to clipboard!');
     }
   };
 
@@ -208,6 +239,76 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
         </CardHeader>
       </Card>
 
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+        {/* HEADER — clickable */}
+        <CardHeader
+          role="button"
+          onClick={() => setOpen(!open)}
+          className="cursor-pointer select-none">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Waypoints className="w-5 h-5 text-gray-600" />
+                <div>
+                  <CardTitle className="text-lg text-gray-900">AI Starter Prompt</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    This is your AI context. Paste it once at the start of your ChatGPT conversation.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Copy button (stop propagation to avoid toggle) */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyContextToClipboard();
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </Button>
+                {/* Chevron */}
+                <ChevronDown
+                  className={`w-5 h-5 text-gray-600 transition-transform ${
+                    open ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
+            </div>
+        </CardHeader>
+
+        {/* COLLAPSIBLE CONTENT */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ${
+            open ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+        <CardContent>
+          <div>         
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-blue-800">System Prompt:</span>
+                <Badge className="ml-2 bg-blue-100 text-blue-700">
+                  {meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}
+                </Badge>
+                <p className="text-blue-700">Write a report in style '{meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}' on the progress of the tasks listed below, highlighting key points and any potential blockers.</p>
+                {/* en {meeting.reportSettings.style.language} */}
+              </div>
+              {meeting.reportSettings.additionalPrompt && (
+                <div>
+                  <span className="text-sm font-medium text-blue-800">Additionnal Prompt:</span>
+                  <p className="text-blue-700 text-sm italic">{meeting.reportSettings.additionalPrompt}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+        </div>
+      </Card>
+
       {(isGenerating || generatedReport) && (
         <Card className="bg-white border-0 shadow-md">
           <CardHeader>
@@ -215,7 +316,7 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-gray-600" />
                 <div>
-                  <CardTitle className="text-lg text-gray-900">Generated Report</CardTitle>
+                  <CardTitle className="text-lg text-gray-900">Report Prompt</CardTitle>
                   {lastGenerated && (
                     <p className="text-sm text-gray-600">
                       Generated on {lastGenerated.toLocaleString()}
@@ -238,15 +339,6 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={copyToClipboard}
-                    className="flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Copy
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
                     onClick={downloadReport}
                     className="flex items-center gap-2"
                   >
@@ -261,6 +353,15 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
                   >
                     <Save className="w-4 h-4" />
                     {isSaving ? 'Saving...' : 'Save to Storage'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyToClipboard}
+                    className="flex items-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy
                   </Button>
                 </div>
               )}
@@ -291,57 +392,6 @@ export default function ReportGeneration({ meeting }: ReportGenerationProps) {
           </CardContent>
         </Card>
       )}
-
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-lg text-blue-900">Report Input Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-blue-800">Meeting:</span>
-                <p className="text-blue-700">{meeting.title}</p>
-              </div>
-              {/*<div>
-                <span className="text-sm font-medium text-blue-800">Date:</span>
-                <p className="text-blue-700">{new Date(meeting.date).toLocaleDateString()} at {meeting.time}</p>
-              </div>*/}
-              <div>
-                <span className="text-sm font-medium text-blue-800">Projects:</span>
-                <p className="text-blue-700">{meeting.projects.length} projects</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-blue-800">Tasks:</span>
-                <p className="text-blue-700">{getCompletedTasks()}/{getTotalTasks()} completed</p>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-blue-800">Report Style:</span>
-                <Badge className="ml-2 bg-blue-100 text-blue-700">
-                  {meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}
-                </Badge>
-                <p className="text-blue-700">Write a report in style '{meeting.reportSettings.style.charAt(0).toUpperCase() + meeting.reportSettings.style.slice(1).replace('-', ' ')}' on the progress of the tasks listed below, highlighting key points and any potential blockers.</p>
-                {/* en {meeting.reportSettings.style.language} */}
-              </div>
-              {/*<div>
-                <span className="text-sm font-medium text-blue-800">Notes:</span>
-                <p className="text-blue-700">
-                  {meeting.notes ? `${meeting.notes.length} characters` : 'No notes'}
-                </p>
-              </div>*/}
-              {meeting.reportSettings.additionalPrompt && (
-                <div>
-                  <span className="text-sm font-medium text-blue-800">Custom Instructions:</span>
-                  <p className="text-blue-700 text-sm italic">"{meeting.reportSettings.additionalPrompt}"</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card className="bg-amber-50 border-amber-200 border">
         <CardContent className="p-4">
@@ -579,13 +629,13 @@ function generateMockReportMD(meeting: Meeting): string {
     report += `- Completion Rate: ${Math.round((completedTasks / Math.max(totalTasks, 1)) * 100)}%\n\n`;
   }
 
-  if (meeting.reportSettings.additionalPrompt) {
+  /*if (meeting.reportSettings.additionalPrompt) {
     report += `\n**Additional Considerations:**\n`;
     report += `${meeting.reportSettings.additionalPrompt}\n`;
-  }
+  }*/
 
-  report += `\n---\n`;
-  report += `*This report was generated automatically based on meeting data and notes.*`;
+  //report += `\n---\n`;
+  //report += `*This report was generated automatically based on meeting data and notes.*`;
 
   return report;
 }
