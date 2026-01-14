@@ -136,7 +136,7 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
 
       if (!reportError && reportData) {
         const report = mapSupabaseToGeneratedReport(reportData)
-        if (report.file_path) {
+        /*if (report.file_path) {
           const filePath = report.file_path.split('/').pop();
           if (filePath) {
             const { data: fileData, error: fileError } = await supabase.shareFile(
@@ -153,7 +153,7 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
               setLastGenerated(new Date(report.created_at));
             }
           }
-        } else if (report.content) {
+        } else */if (report.content) {
           setGeneratedReport(report.content);
           setLastGenerated(new Date(report.created_at));
         }
@@ -173,7 +173,7 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
       setGeneratedReport(report);
       setLastGenerated(new Date());
       setIsGenerating(false);
-    }, 3000);
+    }, 300);
   };
 
   const saveReport = async () => {
@@ -187,9 +187,9 @@ export default function ReportPrompt({ meeting }: ReportPromptProps) {
       const file = new Blob([generatedReport], { type: 'text/markdown' });
       const fileToUpload = new File([file], fileName, { type: 'text/markdown' });
 
-      const { error: uploadError } = await supabase.uploadFile(user.id, fileName, fileToUpload);
+      //const { error: uploadError } = await supabase.uploadFile(user.id, fileName, fileToUpload);
 
-      if (uploadError) throw uploadError;
+      //if (uploadError) throw uploadError;
 
       const filePath = `${user.id}/${fileName}`;
       const { error: saveError } = await supabase.saveGeneratedReport(meeting.id, generatedReport, filePath);
