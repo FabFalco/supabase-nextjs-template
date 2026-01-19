@@ -7,7 +7,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_PRODUCTNAME,
-  description: "The best way to build your SaaS product.",
+  description: "The smart Kanban built for meetings, personal productivity, and effortless summaries.",
 };
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
   }
   const gaID = process.env.NEXT_PUBLIC_GOOGLE_TAG;
   return (
-    <html lang="en">
+    <html lang="en"> 
     <body className={theme}>
       {children}
       <Analytics />
