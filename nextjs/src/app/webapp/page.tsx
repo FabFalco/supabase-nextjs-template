@@ -153,6 +153,13 @@ export default function Home() {
     setSelectedMeeting(updatedMeeting);
   };
 
+  const handleMeetingRemove = (meetingId: string) => {
+    setMeetings((prev) =>
+      prev.filter((meeting) => meeting.id !== meetingId)
+    );
+    setSelectedMeeting(null);
+  }
+
   const getProjectCount = (meeting: Meeting) => meeting.projects.length;
   const getTaskCount = (meeting: Meeting) => 
     meeting.projects.reduce((acc, project) => acc + project.tasks.length, 0);
@@ -168,6 +175,7 @@ export default function Home() {
         onBack={() => setSelectedMeeting(null)}
         onProjectBack={() => setSelectedMeeting(selectedMeeting)}
         onUpdate={handleMeetingUpdate}
+        onRemove={handleMeetingRemove}
       />
     );
   }
