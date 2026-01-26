@@ -6,7 +6,7 @@ import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/webapp/ui/tabs';
-import { ArrowLeft, FolderOpen, Settings, FileText, Sparkles, Plus } from 'lucide-react';
+import { ArrowLeft, FolderOpen, Settings, FileText, Sparkles, Plus, Trash2 } from 'lucide-react';
 import { Meeting } from '@/types';
 import ProjectView from './ProjectView';
 import NotesView from './NotesView';
@@ -15,7 +15,6 @@ import ReportPrompt from './ReportPrompt';
 import CreateProjectDialog from './CreateProjectDialog';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { mapSupabaseToMeetings } from '@/lib/mapper';
-import { mapSupabaseToProject } from '@/lib/mapper';
 import TopNavBar from '@/components/webapp/TopNavBar';
 
 interface MeetingViewProps {
@@ -23,9 +22,10 @@ interface MeetingViewProps {
   onBack: () => void;
   onProjectBack: () => void;
   onUpdate: (meeting: Meeting) => void;
+  onRemove: (meetingId: string) => void;
 }
 
-export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate }: MeetingViewProps) {
+export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate, onRemove }: MeetingViewProps) {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('projects');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
@@ -45,6 +45,22 @@ export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate }
     onUpdate({ ...meeting, projects: updatedProjects });
   };
 
+  async function onMeetingDeleted(meetingId: string) {
+    const confirmed = confirm(
+      "This will permanently delete the meeting and all related data. Continue?"
+    );
+    if (!confirmed) return;
+  
+    try {
+      const supabase = await createSPASassClient();
+      const { error } = await supabase.deleteMeeting(meetingId);
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  
+    onRemove(meetingId);
+  }
+
   const selectedProjectData = meeting.projects.find(p => p.id === selectedProject);
 
   if (selectedProject && selectedProjectData) {
@@ -58,6 +74,13 @@ export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate }
             p.id === updatedProject.id ? updatedProject : p
           );
           handleProjectUpdate(updatedProjects);
+        }}
+        onRemove={(removedProject) => {
+          const removedProjects = meeting.projects.filter(
+            (project) => project.id !== removedProject.id
+          );
+          handleProjectUpdate(removedProjects);
+          setSelectedProject(null);
         }}
       />
     );
@@ -135,6 +158,16 @@ export default function MeetingView({ meeting, onBack, onProjectBack, onUpdate }
                 <Badge variant="outline" className="border-green-500 text-green-700 bg-green-50">
                   {Math.round((getCompletedTasks() / Math.max(getTotalTasks(), 1)) * 100)}% Complete
                 </Badge>
+                <Trash2
+                  className="
+                    w-4 h-4
+                    text-gray-400
+                    cursor-pointer
+                    transition-colors
+                    hover:text-red-500
+                  "
+                  onClick={() => onMeetingDeleted(meeting.id)}
+                />
               </div>
             </div>
           </div>

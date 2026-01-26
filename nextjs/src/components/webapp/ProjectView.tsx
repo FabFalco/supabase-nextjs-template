@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { Button } from '@/components/webapp/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/webapp/ui/card';
 import { Badge } from '@/components/webapp/ui/badge';
-import { ArrowLeft, Plus, GripVertical } from 'lucide-react';
+import { ArrowLeft, Plus, GripVertical, Trash2 } from 'lucide-react';
 import { Project, Task } from '@/types';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import TopNavBar from '@/components/webapp/TopNavBar';
-import { mapSupabaseToTask, mapTaskToSupabase } from '@/lib/mapper';
+import { mapSupabaseToTask } from '@/lib/mapper';
 import { useHistoryBack } from '@/hooks/useHistoryBack';
 
 interface ProjectViewProps {
@@ -16,6 +16,7 @@ interface ProjectViewProps {
   meetingTitle: string;
   onBack: () => void;
   onUpdate: (project: Project) => void;
+  onRemove: (project: Project) => void;
 }
 
 const statusConfig = {
@@ -39,11 +40,43 @@ const statusConfig = {
   }
 };
 
-export default function ProjectView({ project, meetingTitle, onBack, onUpdate }: ProjectViewProps) {
+export default function ProjectView({ project, meetingTitle, onBack, onUpdate, onRemove }: ProjectViewProps) {
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [draggedFrom, setDraggedFrom] = useState<string | null>(null);
 
   useHistoryBack(onBack, 'project');
+
+  async function onProjectDeleted(projectDeleted: Project) {
+    const confirmed = confirm(
+      "This will permanently delete the project and all related data. Continue?"
+    );
+    if (!confirmed) return;
+  
+    try {
+      const supabase = await createSPASassClient();
+      const { error } = await supabase.deleteProject(projectDeleted.id);
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  
+    onRemove(projectDeleted);
+  }
+
+  async function onTaskDeleted(taskDeleted: Task) {
+    const confirmed = confirm(
+      "This will permanently delete the task and all related data. Continue?"
+    );
+    if (!confirmed) return;
+  
+    try {
+      const supabase = await createSPASassClient();
+      const { error } = await supabase.deleteTask(taskDeleted.id);
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  
+    deleteTask(taskDeleted.id);
+  }
 
   const handleDragStart = (task: Task) => {
     setDraggedTask(task);
@@ -125,6 +158,14 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
     }
   };
 
+  const deleteTask = async (taskId: string) => {
+    const updatedTasks = project.tasks.filter(
+      (task) => task.id !== taskId
+    );
+
+    onUpdate({ ...project, tasks: updatedTasks });
+  };
+
   const buttonBack = (
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
         <Button
@@ -146,13 +187,29 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
         <div className="mb-6">
 
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.name}</h1>
-            <p className="text-gray-600 mb-4">{project.description}</p>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span>📋 {project.tasks.length} Total Tasks</span>
-              <span>✅ {getTasksByStatus('finish').length} Completed</span>
-              <span>🚧 {getTasksByStatus('in-progress').length} In Progress</span>
-              <span>🚫 {getTasksByStatus('blocked').length} Blocked</span>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.name}</h1>
+                <p className="text-gray-600 mb-4">{project.description}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span>📋 {project.tasks.length} Total Tasks</span>
+                  <span>✅ {getTasksByStatus('finish').length} Completed</span>
+                  <span>🚧 {getTasksByStatus('in-progress').length} In Progress</span>
+                  <span>🚫 {getTasksByStatus('blocked').length} Blocked</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Trash2
+                  className="
+                    w-4 h-4
+                    text-gray-400
+                    cursor-pointer
+                    transition-colors
+                    hover:text-red-500
+                  "
+                  onClick={() => onProjectDeleted(project)}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -200,6 +257,16 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate }:
                               {task.title}
                             </CardTitle>
                             <GripVertical className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" />
+                            <Trash2
+                              className="
+                                w-4 h-4
+                                text-gray-400
+                                cursor-pointer
+                                transition-colors
+                                hover:text-red-500
+                              "
+                              onClick={() => onTaskDeleted(task)}
+                            />
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0">
