@@ -253,7 +253,7 @@ export default function Home() {
                   </li>
                 </ul>
               </div>
-              <div>
+              {/*<div>
                 <h4 className="text-sm font-semibold text-gray-900">Resources</h4>
                 <ul className="mt-4 space-y-2">
                   <li>
@@ -262,7 +262,7 @@ export default function Home() {
                     </Link>
                   </li>
                 </ul>
-              </div>
+              </div>*/}
               <div>
                 <h4 className="text-sm font-semibold text-gray-900">Legal</h4>
                 <ul className="mt-4 space-y-2">
