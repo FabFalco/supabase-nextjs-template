@@ -117,45 +117,45 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate, o
 
   const addNewTask = async (status: Task['status']) => {
     try {
-      const supabase = await createSPASassClient();
-      const { data, error } = await supabase.createTask({
-        title: 'New Task',
-        description: 'Click to edit description',
-        status,
-        project_id: project.id,
-        order_index: project.tasks.length
-      });
-
-      if (error) throw error;
-
-      if (data) {
-        const newTask = mapSupabaseToTask(data);
-
-        onUpdate({
-          ...project,
-          tasks: [...project.tasks, newTask]
+        const supabase = await createSPASassClient();
+        const { data, error } = await supabase.createTask({
+          title: 'New Task',
+          description: '',
+          status,
+          project_id: project.id,
+          order_index: project.tasks.length
         });
+  
+        if (error) throw error;
+  
+        if (data) {
+          const newTask = mapSupabaseToTask(data);
+  
+          onUpdate({
+            ...project,
+            tasks: [...project.tasks, newTask]
+          });
+        }
+      } catch (err) {
+        console.error('Error creating task:', err);
+        alert('Failed to create task');
       }
-    } catch (err) {
-      console.error('Error creating task:', err);
-      alert('Failed to create task');
-    }
   };
 
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
-    const updatedTasks = project.tasks.map(task =>
-      task.id === taskId ? { ...task, ...updates } : task
-    );
+      const updatedTasks = project.tasks.map(task =>
+        task.id === taskId ? { ...task, ...updates } : task
+      );
 
-    onUpdate({ ...project, tasks: updatedTasks });
+      onUpdate({ ...project, tasks: updatedTasks });
 
-    try {
-      const supabase = await createSPASassClient();
-      //const dbUpdates = mapTaskToSupabase(updates);
-      await supabase.updateTask(taskId, updates);
-    } catch (err) {
-      console.error('Error updating task:', err);
-    }
+      try {
+        const supabase = await createSPASassClient();
+        //const dbUpdates = mapTaskToSupabase(updates);
+        await supabase.updateTask(taskId, updates);
+      } catch (err) {
+        console.error('Error updating task:', err);
+      }
   };
 
   const deleteTask = async (taskId: string) => {
@@ -252,7 +252,12 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate, o
                               className="text-sm font-medium text-gray-900 flex-1 cursor-text"
                               contentEditable
                               suppressContentEditableWarning
-                              onBlur={(e) => updateTask(task.id, { title: e.currentTarget.textContent || '' })}
+                              onBlur={(e) => {
+                                const value = e.currentTarget.textContent?.trim() || ''
+                                if (value === task.title) return
+                                if (!value) return
+                                updateTask(task.id, { title: value })
+                              }}
                             >
                               {task.title}
                             </CardTitle>
@@ -270,13 +275,33 @@ export default function ProjectView({ project, meetingTitle, onBack, onUpdate, o
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0">
-                          <p 
-                            className="text-xs text-gray-600 leading-relaxed cursor-text"
+                          <p
+                            className={`
+                              text-xs leading-relaxed cursor-text
+                              ${task.description ? 'text-gray-600' : 'text-gray-400 italic'}
+                            `}
                             contentEditable
                             suppressContentEditableWarning
-                            onBlur={(e) => updateTask(task.id, { description: e.currentTarget.textContent || '' })}
+                            onFocus={(e) => {
+                              if (!task.description) {
+                                e.currentTarget.textContent = ''
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const value = e.currentTarget.textContent?.trim() || ''
+                            
+                              if (!value) {
+                                e.currentTarget.textContent = 'Add a description…'
+                              }
+
+                              if (value === task.description) {
+                                return // 🚀 rien à faire
+                              }
+
+                              updateTask(task.id, { description: value })
+                            }}
                           >
-                            {task.description}
+                            {task.description || 'Add a description…'}
                           </p>
                         </CardContent>
                       </Card>
