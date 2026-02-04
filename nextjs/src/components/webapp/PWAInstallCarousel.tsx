@@ -13,7 +13,8 @@ const pwaSteps = [
   {
     title: 'Open the app in Chrome',
     description: 'Use Google Chrome on your phone.',
-    image: '/pwa/step-1-open-chrome.jpg',
+    image: '/pwa/qrcode_meetingreportai.png',
+    //image: '/pwa/step-1-open-chrome.jpg',
   },
   {
     title: 'Add to home screen',
