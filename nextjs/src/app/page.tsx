@@ -3,7 +3,16 @@ import Link from 'next/link';
 import { ArrowRight, Globe, Shield, Users, Key, Database, Clock, Calendar, TreeDeciduous, FolderKanban, ListTodo } from 'lucide-react';
 import AuthAwareButtons from '@/components/AuthAwareButtons';
 import HomePricing from "@/components/HomePricing";
-import { Treemap } from 'recharts';
+import PWAInstallCarousel from "@/components/webapp/PWAInstallCarousel";
+import OnBoardingCarousel from "@/components/webapp/OnBoardingCarousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from '@/components/webapp/ui/carousel';
+import Image from 'next/image';
 
 export default function Home() {
   const productName = process.env.NEXT_PUBLIC_PRODUCTNAME;
@@ -234,6 +243,10 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        <OnBoardingCarousel/>
+
+        <PWAInstallCarousel/>
 
         <footer className="bg-gray-50 border-t border-gray-200">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">

@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/webapp/ui/dropdown-menu';
-import { User, LogOut, Key, CreditCard } from 'lucide-react';
+import { User, LogOut, Key, CreditCard, BookOpenText, MonitorDown } from 'lucide-react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/webapp/ui/avatar';
@@ -59,6 +59,14 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
     router.push('/webapp/settings/stripe/management');
   };
 
+  const handleInstallMe = () => {
+    router.push('/#installme');
+  };
+
+  const handleOnBoarding = () => {
+    router.push('/#onboarding');
+  };
+
   return (
     <div className="bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto px-4 py-3 max-w-7xl">
@@ -97,7 +105,17 @@ export default function TopNavBar({ title = (<h1 className="text-xl font-bold te
 
                     { PricingService.isActivated() && stripeMenu }
                     <DropdownMenuSeparator />
-                    
+
+                    <DropdownMenuItem onClick={handleOnBoarding}>
+                      <BookOpenText className="w-4 h-4 mr-2" />
+                      OnBoarding
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={handleInstallMe}>
+                      <MonitorDown className="w-4 h-4 mr-2" />
+                      Install Me
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem
                       onClick={handleLogout}
                       disabled={isLoggingOut}
